@@ -145,6 +145,8 @@ kernel_name		db 'KERNEL  SYS'
 
 ;Includes
 
+bits 16
+
 %include 'bootloader/functions/fat12.inc'
 %include 'bootloader/functions/a20_enabler.inc'
 %include 'bootloader/functions/gdt.inc'

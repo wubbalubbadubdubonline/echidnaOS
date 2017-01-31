@@ -99,20 +99,17 @@ pop es
 jc .done								; If carry exit with flag
 
 push ds
-push es
 
 mov si, 0x7000
 mov ds, si
-xor esi, esi
-mov es, si
 mov edi, ebx
+xor esi, esi
 
 push ecx
 mov ecx, 512
 a32 o32 rep movsb
 pop ecx
 
-pop es
 pop ds
 
 inc ax									; Increment sector

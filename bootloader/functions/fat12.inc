@@ -15,14 +15,14 @@ load_file:
 ; NOTES:
 ; This routine assumes 1000:0000 --> 1000:FFFF to be a usable buffer
 
-push ax						; Save registers to prepare entering routine
-push bx
-push cx
-push dx
-push si
+push eax						; Save registers to prepare entering routine
+push ebx
+push ecx
+push edx
+push esi
 push fs
 
-push bx						; Save target offset for later
+push ebx						; Save target offset for later
 push es						; Save target segment for later
 
 ; Save current drive number
@@ -31,11 +31,12 @@ mov byte [.CurrentDrive], dl
 
 ;  Fetch metadata from floppy
 
-xor bx, bx					; Load in the buffer (1000:0000)
+xor ebx, ebx					; Load in the buffer (1000:0000)
 mov ax, 0x1000
 mov es, ax
 xor ax, ax					; Load LBA sector 0 (boot sector)
-call floppy_read_sector
+mov cx, 1					; Load 1 sector
+call read_sectors
 
 mov ax, word [es:0x000E]			; Save specifications in memory
 mov word [.ReservedSectors], ax
@@ -74,11 +75,11 @@ mov word [.SizeOfRoot], ax				; Save result in memory
 
 ; Load root dir into buffer
 
-xor bx, bx
+xor ebx, ebx
 mov ax, word [.StartOfRoot]				; Load from here
 mov cx, word [.SizeOfRoot]				; Load this many sectors
 mov dl, byte [.CurrentDrive]			; Retrieve drive
-call floppy_read_sectors
+call read_sectors
 
 ; Browse root dir for a matching name to the one in SI
 
@@ -130,11 +131,11 @@ mov word [.Cluster], ax			; Save starting cluster
 ; FAT start = Reserved Sectors
 ; FAT size = Sectors per FAT
 
-xor bx, bx
+xor ebx, ebx
 mov ax, word [.ReservedSectors]			; Load from here
 mov cx, word [.SectorsPerFAT]			; Load this many sectors
 mov dl, byte [.CurrentDrive]			; Retrieve current drive
-call floppy_read_sectors
+call read_sectors
 
 ; Start of data = (Start of root - 2) + size of root
 
@@ -146,7 +147,7 @@ mov word [.DataStart], ax
 ; We'll now load the chain of clusters in the target destination
 
 pop es						; Restore target segment
-pop bx						; Restore target offset
+pop ebx						; Restore target offset
 
 mov ax, 0x1000				; Now point FS to the buffer
 mov fs, ax
@@ -159,9 +160,9 @@ mov dl, byte [.CurrentDrive]	; Retrieve current drive
 cmp ax, 0xFF7				; Is the last cluster?
 jg .done					; If yes, we finished
 add ax, word [.DataStart]	; Add the data start offset
-
-call floppy_read_sector		; Read!
-add bx, 512					; Move buffer up a sector
+mov cx, 1					; 1 sector
+call read_sectors			; Read!
+add ebx, 512					; Move buffer up a sector
 
 .cluster_fetch:
 
@@ -193,17 +194,17 @@ jmp .cluster_loop
 
 pop si					; SI out of stack
 pop es
-pop bx
+pop ebx
 stc						; Set carry
 
 .done:
 
 pop fs					; Restore registers
-pop si
-pop dx
-pop cx
-pop bx
-pop ax
+pop esi
+pop edx
+pop ecx
+pop ebx
+pop eax
 ret
 
 .ReservedSectors dw 0x0000

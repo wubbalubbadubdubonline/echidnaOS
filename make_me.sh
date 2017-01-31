@@ -23,10 +23,8 @@ mkdir tmp
 
 printf "Compiling kernel...\n"
 gcc -c -m32 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin "kernel/kernel.c" -o "tmp/kernel.o" -masm=intel
-objcopy --only-section=.text --output-target binary "tmp/kernel.o" "tmp/kernel.tmp"
-dd skip=1048576 bs=1 status=none if="tmp/kernel.tmp" of="tmp/kernel.sys"
+ld -o "tmp/kernel.sys" -Ttext 0x100000 "tmp/kernel.o" --oformat binary -melf_i386
 rm "tmp/kernel.o"
-rm "tmp/kernel.tmp"
 
 printf "Compiling content of the C sources in the 'sources' directory...\n"
 for c_file in sources/*.c
@@ -35,7 +33,7 @@ do
 	base_name=${base_name:8}
 	printf "Compiling '$c_file'...\n"
 	gcc -c -m32 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin "$c_file" -o "tmp/${base_name}.o" -masm=intel
-	objcopy --only-section=.text --output-target binary "tmp/${base_name}.o" "tmp/${base_name}.bin"
+	ld -o "tmp/${base_name}.bin" -Ttext 0x100 "tmp/${base_name}.o" --oformat binary -melf_i386
 	rm "tmp/${base_name}.o"
 done
 

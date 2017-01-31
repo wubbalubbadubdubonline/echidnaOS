@@ -131,8 +131,6 @@ jc err							; Catch any error
 mov si, DoneMsg
 call simple_print				; Display done message
 
-xchg bx, bx
-
 ; Done!
 
 %include 'bootloader/functions/enter_pmode.inc'		; Enter Protected Mode

@@ -1,5 +1,7 @@
 /* stub kernel */
 
+#include "libs/stdint.h"
+
 void putchar(char c);
 
 void _start(void) {

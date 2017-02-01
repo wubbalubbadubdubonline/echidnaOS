@@ -28,8 +28,8 @@ typedef unsigned long long	uint64_t;
 #define INT32_MAX		((int32_t)0x7FFFFFFF)
 #define INT64_MAX		((int64_t)0x7FFFFFFFFFFFFFFF)
 
-#define INTMAX_C(n) 		((intmax_t)n)
-#define UINTMAX_C(n)		((uintmax_t)n)
+#define INTMAX_C 		INT64_C
+#define UINTMAX_C		UINT64_C
 
 #define INT8_C(n)		(##nSS)
 #define INT16_C(n)		(##nS)

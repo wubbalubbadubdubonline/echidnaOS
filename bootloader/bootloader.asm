@@ -79,6 +79,7 @@ Stage2Msg		db 'Loading Stage 2...', 0x00
 A20Msg			db 'Enabling A20 line...', 0x00
 UnrealMsg		db 'Entering Unreal Mode...', 0x00
 KernelMsg		db 'Loading kernel...', 0x00
+WaitMsg			db 'Waiting for BIOS to stop drives...', 0x00
 ErrMsg			db 0x0D, 0x0A, 'Error, system halted.', 0x00
 DoneMsg			db '  DONE', 0x0D, 0x0A, 0x00
 
@@ -91,6 +92,9 @@ times 510-($-$$)			db 0x00				; Fill rest with 0x00
 bios_signature				dw 0xAA55			; BIOS signature
 
 ; ************************* STAGE 2 ************************
+
+mov word [0x0070], timer_int		; Hook the timer interrupt
+mov word [0x0072], 0x0000
 
 ; ***** A20 *****
 
@@ -131,9 +135,32 @@ jc err							; Catch any error
 mov si, DoneMsg
 call simple_print				; Display done message
 
+; *** Wait for drives to be stopped by BIOS ***
+
+mov si, WaitMsg					; Show wait message
+call simple_print
+
+mov ecx, 50
+call sleep
+
+mov si, DoneMsg
+call simple_print				; Display done message
+
 ; Done!
 
 %include 'bootloader/functions/enter_pmode.inc'		; Enter Protected Mode
+
+; *** Setup registers ***
+
+xor eax, eax
+xor ebx, ebx
+xor ecx, ecx
+and edx, 0x000000FF
+xor esi, esi
+xor edi, edi
+xor ebp, ebp
+
+mov esp, 0x500000				; Stack at 5MB
 
 jmp 0x100000					; Jump to the newly loaded kernel
 
@@ -145,6 +172,8 @@ kernel_name		db 'KERNEL  SYS'
 
 bits 16
 
+%include 'bootloader/functions/sleep.inc'
+%include 'bootloader/functions/timer_int.inc'
 %include 'bootloader/functions/fat12.inc'
 %include 'bootloader/functions/a20_enabler.inc'
 %include 'bootloader/functions/gdt.inc'

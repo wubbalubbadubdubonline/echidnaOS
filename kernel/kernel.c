@@ -1,28 +1,43 @@
 /* stub kernel */
 
 #include "libs/stdint.h"
-#include "libs/string.h"
+// #include "libs/string.h"
 
 void putchar(char c, char x, char y);
-void putstr(char* c, char x, char y);
+void putstr(const char* str, char x, char y, int len);
 
 void _start(void) {
-	// asm("xchg bx, bx");
+	//asm("xchg bx, bx");
+
+	putchar('T', 5, 5);
+	putchar('e', 6, 5);
+	putchar('s', 7, 5);
+	putchar('t', 8, 5);
+	putchar('y', 9, 5);
+	putchar(' ', 10, 5);
+	putchar('t', 11, 5);
+	putchar('e', 12, 5);
+	putchar('s', 13, 5);
+	putchar('t', 14, 5);
+
 	putstr("Testy test", 5, 4, 10);
-	asm("hlt");
+
+	//asm("hlt");
 }
 
 void putstr(const char* str, char x, char y, int len) {
-	//int len = strlen(str);
 	int i = 0;
-	while (i < len) {
-		putchar(str[i], x, y);
-		x++;
-		if (x > 80 - 1) {
-			x = 0;
-			y++;
-		}
-		i++;
+	putchar('I', x, y);
+	// int len = strlen(str);
+	// putchar('L', x, y);
+	int pos = x + 80 * y;
+	putchar('P', x, y);
+	char* vidmem = (char*) 0xb8000;
+	putchar('V', x, y);
+	for ( ; i < len; i++) {
+		vidmem[pos * 2] = str[i];
+		vidmem[pos * 2 + 1] = 0x0F;
+		pos++;
 	}
 }
 

@@ -31,7 +31,7 @@ int strncmp(const char *str1, const char *str2, size_t len)
   return 0;
 }
 
-const char *strcpy(char *dest, const char *src)
+char *strcpy(char *dest, const char *src)
 {
   size_t i;
 
@@ -43,7 +43,7 @@ const char *strcpy(char *dest, const char *src)
   return dest;
 }
 
-const char *strncpy(char *dest, const char *src, size_t len)
+char *strncpy(char *dest, const char *src, size_t len)
 {
   size_t i;
 
@@ -56,7 +56,7 @@ const char *strncpy(char *dest, const char *src, size_t len)
   return dest;
 }
 
-const char *strcat(char *dest, const char *src)
+char *strcat(char *dest, const char *src)
 {
   char *ret = dest;
   /* find the end of the destination string */
@@ -68,7 +68,7 @@ const char *strcat(char *dest, const char *src)
   return ret;
 }
 
-const char *strncat(char *dest, const char *src, size_t len)
+char *strncat(char *dest, const char *src, size_t len)
 {
   char *ret = dest;
 
@@ -81,7 +81,7 @@ const char *strncat(char *dest, const char *src, size_t len)
   return dest;
 }
 
-const char *strchr(const char *str, int ch)
+char *strchr(const char *str, int ch)
 {
   for ( ; *str ; str++ )
     if ( *str == (char)ch )
@@ -90,7 +90,7 @@ const char *strchr(const char *str, int ch)
   return NULL;
 }
 
-const char *strrchr(const char *str, int ch)
+char *strrchr(const char *str, int ch)
 {
   const char *sp = NULL;
 
@@ -102,7 +102,7 @@ const char *strrchr(const char *str, int ch)
 }
 
 /* brace pyramids are abominations, but it's more readable this way >:( */
-const char *strstr(const char *str1, const char *str2)
+char *strstr(const char *str1, const char *str2)
 {
 
   for (size_t i = 0; *str1; str1++, i = 0 )
@@ -165,7 +165,7 @@ void *memmove(void *dest, const void *src, size_t len)
   return memcpy(dest, cpy, len);
 }
 
-const void *memchr(const void *haystack, int needle, size_t size)
+void *memchr(const void *haystack, int needle, size_t size)
 {
   for ( ; size--; haystack++ )
     if ( *(char *)haystack == (char)needle )

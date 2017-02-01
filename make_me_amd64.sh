@@ -32,7 +32,7 @@ do
 	base_name=${c_file%.c}
 	base_name=${base_name:8}
 	printf "Compiling '$c_file'...\n"
-	gcc -c -m64 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin "$c_file" -o "tmp/${base_name}.o" -masm=intel
+	gcc -c -std=c99 -m64 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin "$c_file" -o "tmp/${base_name}.o" -masm=intel -D__64BIT__
 	ld -o "tmp/${base_name}.bin" -Ttext 0x100 "tmp/${base_name}.o" --oformat binary -melf_x86_64
 	rm "tmp/${base_name}.o"
 done

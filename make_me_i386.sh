@@ -13,7 +13,7 @@ rm echidna.old 2> /dev/null
 mv echidna.img echidna.old 2> /dev/null
 
 printf "Assembling bootloader...\n"
-nasm bootloader/bootloader.asm -f bin -o echidna.img
+nasm bootloader/bootloader_i386.asm -f bin -o echidna.img
 
 printf "Expanding image...\n"
 dd bs=512 count=2872 status=none if=/dev/zero >> echidna.img

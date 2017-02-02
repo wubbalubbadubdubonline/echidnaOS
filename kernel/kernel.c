@@ -11,6 +11,8 @@ void putstr(const char* str, char x, char y, int len);
 void _start(void) {
 	magic_breakpoint();
 
+	//port_out_b(0x10, 0x20);
+
 	putchar('T', 5, 5);
 	putchar('e', 6, 5);
 	putchar('s', 7, 5);
@@ -25,6 +27,7 @@ void _start(void) {
 	putstr("Testy test", 5, 4, 10);
 
 	system_halt();
+
 }
 
 void putstr(const char* str, char x, char y, int len) {

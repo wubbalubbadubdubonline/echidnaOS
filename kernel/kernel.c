@@ -2,7 +2,7 @@
 
 #include "libs/stddef.h"
 #include "libs/stdint.h"
-//#include "libs/string.h"
+#include "libs/string.h"
 #include "libs/system.h"
 
 void putchar(char c, char x, char y);

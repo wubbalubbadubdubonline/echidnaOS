@@ -11,7 +11,7 @@ kernel.sys: kernel.o ${LIBS_OBJ}
 kernel.o: kernel/kernel.c
 	${CC} ${CFLAGS} -c $< -o $@
 
-${LIBS_OBJ}: ${LIBS}
+%.o: %.c
 	${CC} ${CFLAGS} -c $< -o $@
 
 clean:

@@ -3,7 +3,7 @@ LIBS_OBJ = ${LIBS:.c=.o}
 
 CC = gcc
 
-CFLAGS = -m32 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -masm=intel -D__32BIT__
+CFLAGS = -std=gnu99 -m32 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -masm=intel -D__32BIT__
 
 kernel.sys: kernel.o ${LIBS_OBJ}
 	ld -o $@ -Ttext 0x100000 $^ --oformat binary -melf_i386

@@ -9,9 +9,11 @@ void putchar(char c, char x, char y);
 void putstr(const char* str, char x, char y, int len);
 
 void _start(void) {
+	int x;
 	magic_breakpoint();
 
-	//port_out_b(0x10, 0x20);
+	port_out_b(0x10, 0x20);
+	x = port_in_w(0x40);
 
 	putchar('T', 5, 5);
 	putchar('e', 6, 5);

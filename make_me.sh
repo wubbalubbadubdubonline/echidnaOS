@@ -21,21 +21,9 @@ dd bs=512 count=2872 status=none if=/dev/zero >> echidna.img
 printf "Creating temporary folder to store binaries...\n"
 mkdir tmp
 
-printf "Compiling kernel...\n"
-gcc -c -m32 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin "kernel/kernel.c" -o "tmp/kernel.o" -masm=intel
-ld -o "tmp/kernel.sys" -Ttext 0x100000 "tmp/kernel.o" --oformat binary -melf_i386
-rm "tmp/kernel.o"
+printf "Compiling...\n"
 
-printf "Compiling content of the C sources in the 'sources' directory...\n"
-for c_file in sources/*.c
-do
-	base_name=${c_file%.c}
-	base_name=${base_name:8}
-	printf "Compiling '$c_file'...\n"
-	gcc -c -std=c99 -m32 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin "$c_file" -o "tmp/${base_name}.o" -masm=intel -D__32BIT__
-	ld -o "tmp/${base_name}.bin" -Ttext 0x100 "tmp/${base_name}.o" --oformat binary -melf_i386
-	rm "tmp/${base_name}.o"
-done
+make
 
 printf "Creating mount point for image...\n"
 mkdir mnt
@@ -47,6 +35,7 @@ sleep 3
 printf "Copying files to image...\n"
 cp -r extra/* mnt/ 2> /dev/null
 cp tmp/* mnt/
+cp kernel.sys mnt/
 sleep 3
 
 printf "Unmounting image...\n"
@@ -56,6 +45,9 @@ sleep 3
 printf "Cleaning up...\n"
 rm -rf tmp
 rm -rf mnt
+rm kernel.sys
+
+make clean
 
 printf "Done!\n"
 

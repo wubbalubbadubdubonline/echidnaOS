@@ -1,13 +1,15 @@
 /* stub kernel */
 
+#include "libs/stddef.h"
 #include "libs/stdint.h"
-// #include "libs/string.h"
+//#include "libs/string.h"
+#include "libs/system.h"
 
 void putchar(char c, char x, char y);
 void putstr(const char* str, char x, char y, int len);
 
 void _start(void) {
-	//asm("xchg bx, bx");
+	magic_breakpoint();
 
 	putchar('T', 5, 5);
 	putchar('e', 6, 5);
@@ -22,7 +24,7 @@ void _start(void) {
 
 	putstr("Testy test", 5, 4, 10);
 
-	//asm("hlt");
+	system_halt();
 }
 
 void putstr(const char* str, char x, char y, int len) {

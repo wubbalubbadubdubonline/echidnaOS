@@ -6,19 +6,19 @@ bits 16							; 16-bit real mode code
 
 arch_specific:
 
-%include 'bootloader/includes/enter_pmode.inc'		; Enter Protected Mode
+%include 'bootloader/includes/enter_longmode.inc'		; Enter Long Mode
 
 ; *** Setup registers ***
 
-xor eax, eax
-xor ebx, ebx
-xor ecx, ecx
-and edx, 0x000000FF
-xor esi, esi
-xor edi, edi
-xor ebp, ebp
+xor rax, rax
+xor rbx, rbx
+xor rcx, rcx
+xor rdx, rdx
+xor rsi, rsi
+xor rdi, rdi
+xor rbp, rbp
 
-mov esp, 0x500000				; Stack at 5MB
+mov rsp, 0x1FFFF0				; Stack at 2MiB
 
 jmp 0x100000					; Jump to the newly loaded kernel
 

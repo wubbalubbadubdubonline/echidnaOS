@@ -13,12 +13,12 @@ arch_specific:
 xor eax, eax
 xor ebx, ebx
 xor ecx, ecx
-and edx, 0x000000FF
+xor edx, edx
 xor esi, esi
 xor edi, edi
 xor ebp, ebp
 
-mov esp, 0x500000				; Stack at 5MB
+mov esp, 0x1FFFF0				; Stack at 2MiB
 
 jmp 0x100000					; Jump to the newly loaded kernel
 

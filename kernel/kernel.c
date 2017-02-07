@@ -7,7 +7,7 @@
 #include "drivers/textmode.h"
 
 void _start(void) {
-	int x;
+
 	magic_breakpoint();
 
 	clear_screen();

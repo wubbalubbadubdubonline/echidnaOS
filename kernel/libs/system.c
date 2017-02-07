@@ -1,7 +1,7 @@
 #include "system.h"
 
 void system_halt(void) {
-	asm volatile ("nop; nop; cli; hlt;");
+	asm volatile ("cli; hlt;");
 }
 
 void port_out_b(int port, int value) {

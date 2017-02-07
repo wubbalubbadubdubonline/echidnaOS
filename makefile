@@ -2,7 +2,7 @@ C_FILES = $(wildcard kernel/*.c wildcard kernel/libs/*.c wildcard kernel/drivers
 C_OBJ = ${C_FILES:.c=.o}
 
 CFLAGS = -std=gnu99 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -masm=intel
-LDFLAGS = -Ttext 0x100000 --oformat binary
+LDFLAGS = -Ttext 0x100000 -Tdata 0x180000 --oformat binary
 
 ifeq (${ARCH}, i386)
 ARCHCFLAGS = -m32 -D__32BIT__

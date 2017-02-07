@@ -10,7 +10,9 @@ void _start(void) {
 
 	magic_breakpoint();
 
-	text_reset();
+	text_clear();
+
+	text_putstring("echidnaOS");
 
 	system_halt();
 

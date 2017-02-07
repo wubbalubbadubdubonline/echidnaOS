@@ -20,6 +20,10 @@ mov ss, ax
 mov sp, 0x7BF0
 sti
 
+mov ah, 0x01					; Disable VGA cursor
+mov cx, 0x2607
+int 0x10
+
 mov si, LoadingMsg				; Print loading message using simple print (BIOS)
 call simple_print
 

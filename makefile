@@ -1,4 +1,4 @@
-C_FILES = $(wildcard kernel/libs/*.c wildcard kernel/drivers/*.c)
+C_FILES = $(wildcard kernel/*.c wildcard kernel/libs/*.c wildcard kernel/drivers/*.c wildcard kernel/drivers/video/*.c)
 C_OBJ = ${C_FILES:.c=.o}
 
 CFLAGS = -std=gnu99 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -masm=intel
@@ -25,16 +25,17 @@ echidna.img: kernel.sys bootloader.bin
 	umount ./mnt
 	sleep 3
 	rm -rf mnt
-	rm ${C_OBJ} kernel.o bootloader.bin kernel.sys
+	rm -rf ${C_OBJ} bootloader.bin kernel.sys
 
 bootloader.bin: bootloader/bootloader_${ARCH}.asm
 	nasm bootloader/bootloader_${ARCH}.asm -f bin -o bootloader.bin
 
-kernel.sys: kernel.o ${C_OBJ}
+kernel.sys: ${C_OBJ}
 	ld ${LDFLAGS} ${ARCHLDFLAGS} $^ -o $@
-
-kernel.o: kernel/kernel.c
-	gcc ${CFLAGS} ${ARCHCFLAGS} -c $< -o $@
 
 %.o: %.c
 	gcc ${CFLAGS} ${ARCHCFLAGS} -c $< -o $@
+
+clean:
+	rm -rf mnt
+	rm -rf ${C_OBJ} bootloader.bin kernel.sys

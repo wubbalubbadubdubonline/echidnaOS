@@ -3,8 +3,8 @@
 
 
 // include ports and screen stuff
-#include <stdint.h>
-#include "ports.h"
+#include "../libs/stdint.h"
+#include "../libs/ports.h"
 
 // Status
 #define ATA_SR_BSY     0x80    // Busy

@@ -1,4 +1,4 @@
-LIBS = $(wildcard kernel/libs/*.c)
+LIBS = $(wildcard kernel/libs/*.c wildcard kernel/drivers/*.c)
 LIBS_OBJ = ${LIBS:.c=.o}
 
 CFLAGS = -std=gnu99 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -masm=intel

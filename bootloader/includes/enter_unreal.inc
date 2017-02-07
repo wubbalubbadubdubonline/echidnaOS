@@ -30,8 +30,7 @@ mov ds, ax
 mov es, ax
 mov fs, ax
 mov gs, ax
-mov ax, 0x8000
 mov ss, ax
-mov sp, 0xFFF0
+mov sp, 0x7BF0
 
 sti						; Enable interrupts

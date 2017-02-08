@@ -3,8 +3,8 @@
 #include "libs/stddef.h"
 #include "libs/stdint.h"
 #include "libs/string.h"
-#include "libs/system.h"
-#include "drivers/video/textdrv.h"
+#include "drivers/system.h"
+#include "drivers/textdrv.h"
 
 void _start(void) {
 
@@ -12,7 +12,8 @@ void _start(void) {
 
 	text_clear();
 
-	text_putstring("echidnaOS");
+	text_putchar(0x00);
+	text_putstring("echidnaOS\n\nhello world\b\naaaa\b");
 
 	system_halt();
 

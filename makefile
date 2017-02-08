@@ -1,4 +1,4 @@
-C_FILES = $(wildcard kernel/*.c wildcard kernel/libs/*.c wildcard kernel/drivers/*.c wildcard kernel/drivers/video/*.c)
+C_FILES = $(wildcard kernel/*.c wildcard kernel/libs/*.c wildcard kernel/drivers/*.c)
 C_OBJ = ${C_FILES:.c=.o}
 
 CFLAGS = -std=gnu99 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -masm=intel

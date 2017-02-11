@@ -1,4 +1,11 @@
-#include "textdrv.h"
+#include "../textdrv.h"
+
+/* internal defines */
+
+#define VIDEO_ADDRESS 0xB8000
+#define VIDEO_BOTTOM 0xF9F
+#define ROWS 25
+#define COLS 160
 
 /* internal functions */
 

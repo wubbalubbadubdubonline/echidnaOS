@@ -1,4 +1,4 @@
-#include "system.h"
+#include "../system.h"
 
 void system_halt(void) {
 	asm volatile ("cli; hlt;");

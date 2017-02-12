@@ -12,14 +12,14 @@ struct ata_device {
     uint8_t master; // this is a boolean
     
     uint16_t data_port;
-    uint8_t error_port;
-    uint8_t sector_count_port;
-    uint8_t lba_low_port;
-    uint8_t lba_mid_port;
-    uint8_t lba_hi_port;
-    uint8_t device_port;
-    uint8_t command_port;
-    uint8_t control_port;
+    uint16_t error_port;
+    uint16_t sector_count_port;
+    uint16_t lba_low_port;
+    uint16_t lba_mid_port;
+    uint16_t lba_hi_port;
+    uint16_t device_port;
+    uint16_t command_port;
+    uint16_t control_port;
     
     uint16_t bytes_per_sector;
 };

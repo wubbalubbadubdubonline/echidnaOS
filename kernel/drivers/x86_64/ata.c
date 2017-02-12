@@ -22,17 +22,14 @@ ata_device init_ata_device(uint16_t port_base, uint8_t master) {
 void ata_identify(ata_device dev) {
 
     port_out_b(dev.device_port, dev.master ? 0xA0 : 0xB0);
-    port_out_b(dev.control_port, 0);
+    //port_out_b(dev.control_port, 0);
     
-    port_out_b(dev.device_port, dev.master ? 0xA0 : 0xB0);
     uint8_t status = port_in_b(dev.command_port);
     if (status == 0xFF) {
-        text_putstring("No device found!");
+        text_putstring("No device found! A ");
         return;
     }
-    
-    port_out_b(dev.device_port, dev.master ? 0xA0 : 0xB0);
-    
+        
     port_out_b(dev.sector_count_port, 0);
     port_out_b(dev.lba_low_port, 0);
     port_out_b(dev.lba_mid_port, 0);
@@ -43,7 +40,7 @@ void ata_identify(ata_device dev) {
     status = port_in_b(dev.command_port);
     
     if (status == 0x00) {
-        text_putstring("No device found!");
+        text_putstring("No device found! B");
         return;
     }
     

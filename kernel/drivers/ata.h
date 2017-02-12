@@ -4,6 +4,7 @@
 #include "../libs/stdint.h"
 #include "../libs/stddef.h"
 #include "system.h"
+#include "textdrv.h"
 
 typedef struct ata_device ata_device;
 

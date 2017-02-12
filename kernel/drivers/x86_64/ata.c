@@ -1,5 +1,4 @@
-#include "ata.h"
-#include "textdrv.h"
+#include "../ata.h"
 
 ata_device init_ata_device(uint16_t port_base, uint8_t master) {
     ata_device dev;

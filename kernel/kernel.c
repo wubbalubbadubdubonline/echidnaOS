@@ -36,6 +36,10 @@ void _start(void) {
         ata_identify(ata1s);
         text_putchar('\n');
 
+        ata_write28(ata0m, 1, (uint8_t*)0x7c00, 512);
+        ata_flush(ata0m);
+        ata_read28(ata0m, 1, 512);
+        
 	system_halt();
 
 }

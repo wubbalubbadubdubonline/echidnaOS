@@ -3,11 +3,6 @@
 
 
 
-#define VIDEO_ADDRESS 0xB8000
-#define VIDEO_BOTTOM 0xF9F
-#define ROWS 25
-#define COLS 160
-
 void text_putchar(char c);
 int text_get_cursor_pos_x(void);
 int text_get_cursor_pos_y(void);

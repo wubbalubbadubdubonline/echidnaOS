@@ -24,7 +24,7 @@ int atoi(const char *str)
 	for ( ; *str; str++ )
 	{
 		if ( isdigit(*str) )
-			result = result * 10 + (*str - '0');
+			res = res * 10 + (*str - '0');
 		else
 			return res;
 	}

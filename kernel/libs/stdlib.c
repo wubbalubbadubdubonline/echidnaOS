@@ -1,4 +1,5 @@
 #include "stdlib.h"
+#include "ctype.h"
 
 const char *base_digits = "0123456789abcdefghijklmnopqrstuvwxyz";
 

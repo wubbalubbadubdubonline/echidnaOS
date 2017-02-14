@@ -1,5 +1,6 @@
 #include "stdlib.h"
 #include "ctype.h"
+#include "string.h"
 
 const char *base_digits = "0123456789abcdefghijklmnopqrstuvwxyz";
 
@@ -39,16 +40,44 @@ int atoi(const char *str)
  */
 char *itoa(int n, char *buf, int base)
 {
-	char *cp = buf;
+	/* large enough to hold binary ~0 plus the null byte */
+	char tmp[(sizeof(int)*8)+1];
+	unsigned int m;
 
+	char *cp = tmp;
+
+	/* if using base 10, enable negative numbers */
 	if ( base == 10 && n < 0 )
-		*cp++ = '-';
-
-	while ( n )
 	{
-		*cp++ = base_digits[n % base];
-		n /= base; 
+		*cp++ = '-';
+		n *= -1;
 	}
+
+	m = n;
+
+	/* create number in reverse for convenience */
+	while ( m )
+	{
+		*cp++ = base_digits[m % base];
+		m /= base;
+	}
+
+	*cp = '\0';
+
+	/* now it's time to copy the sting to buf in proper order */
+	cp = buf;
+
+	if ( base == 10 && *tmp == '-' )
+		*cp++ = *tmp;
+
+	int len = strlen(tmp);
+
+	for ( int i = len-1; i >= 0; i-- )
+		*cp++ = tmp[i];
+
+	/* if the number is negative, then we copied the sign twice */
+	if ( *tmp == '-' )
+		cp--;
 
 	*cp = '\0';
 

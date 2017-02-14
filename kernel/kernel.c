@@ -6,10 +6,13 @@
 #include "drivers/system.h"
 #include "drivers/textdrv.h"
 #include "drivers/ata.h"
+#include "drivers/paging.h"
 
 void _start(void) {
 
 	magic_breakpoint();
+
+	map_page(0x10121212121120, 0x7eeeeeec00);
 
 	text_clear();
 

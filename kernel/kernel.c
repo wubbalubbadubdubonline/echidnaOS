@@ -48,10 +48,21 @@ void _start(void) {
 		for (block=0; block<6; block++) {
 			text_putstring("Block ");
 			text_putstring(itoa(block, buf, 16));
+			#if defined(__32BIT__)
+			text_putstring("\nBase: ");
+			text_putstring(itoa(mem_get_block_base(block), buf, 16));
+			text_putstring("\nSize: ");
+        	text_putstring(itoa(mem_get_block_size(block), buf, 16));
+			#elif defined(__64BIT__)
 			text_putstring("\nBase: ");
 			text_putstring(ltoa(mem_get_block_base(block), buf, 16));
 			text_putstring("\nSize: ");
         	text_putstring(ltoa(mem_get_block_size(block), buf, 16));
+			#endif
+			text_putstring("\nType: ");
+        	text_putstring(itoa(mem_get_block_type(block), buf, 16));
+			text_putstring("\nExt: ");
+        	text_putstring(itoa(mem_get_block_ext(block), buf, 16));
 			text_putchar('\n');
 		}
 

@@ -20,6 +20,8 @@ mov ss, ax
 mov sp, 0x7BF0
 sti
 
+mov byte [drive_number], dl		; Save boot drive in memory
+
 mov ah, 0x01					; Disable VGA cursor
 mov cx, 0x2607
 int 0x10
@@ -64,5 +66,6 @@ DoneMsg			db '  DONE', 0x0D, 0x0A, 0x00
 %include 'bootloader/includes/simple_print.inc'
 %include 'bootloader/includes/disk.inc'
 
-times 510-($-$$)			db 0x00				; Fill rest with 0x00
+times 509-($-$$)			db 0x00				; Fill rest with 0x00
+drive_number				db 0x00				; Drive number saved at 0x7DFD
 bios_signature				dw 0xAA55			; BIOS signature

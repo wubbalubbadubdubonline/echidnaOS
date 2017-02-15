@@ -3,8 +3,12 @@
 
 ; ************************* STAGE 2 ************************
 
+cli
+
 mov word [0x0070], timer_int		; Hook the timer interrupt
 mov word [0x0072], 0x0000
+
+sti
 
 ; ***** A20 *****
 
@@ -45,6 +49,37 @@ jc err							; Catch any error
 mov si, DoneMsg
 call simple_print				; Display done message
 
+; *** Detect memory ***
+
+mov si, MemoryMsg
+call simple_print
+
+mov edi, 0x5000					; The memory map is available at 0x00005000
+xor ebx, ebx					; Clear EBX
+mov edx, 0x534D4150				; Magic number
+
+detect_memory:
+
+mov eax, 0xE820					; BIOS function
+mov ecx, 24
+
+clc								; Clear carry
+
+int 0x15						; Detect memory
+
+jc .done
+
+test ebx, ebx					; Check for last entry
+jz .done
+
+add edi, 24						; Increment EDI
+
+jmp detect_memory
+.done:
+
+mov si, DoneMsg
+call simple_print				; Display done message
+
 ; *** Wait for drives to be stopped by BIOS ***
 
 mov si, WaitMsg					; Show wait message
@@ -64,6 +99,7 @@ kernel_name		db 'KERNEL  SYS'
 A20Msg			db 'Enabling A20 line...', 0x00
 UnrealMsg		db 'Entering Unreal Mode...', 0x00
 KernelMsg		db 'Loading kernel...', 0x00
+MemoryMsg		db 'Detecting memory...', 0x00
 WaitMsg			db 'Waiting for BIOS to stop drives...', 0x00
 
 ;Includes

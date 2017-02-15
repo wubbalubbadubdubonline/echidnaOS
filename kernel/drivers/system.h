@@ -19,21 +19,21 @@
 #if defined(__32BIT__)		// 32-bit memory operations
 
 #define mem_store_b(address, value) ({				\
-	asm volatile (	"mov byte [ebx], al"			\
+	asm volatile (	"mov byte ptr ds:[ebx], al"		\
 					:								\
 					: "a" (value), "b" (address)	\
 					: );							\
 })
 
 #define mem_store_w(address, value) ({				\
-	asm volatile (	"mov word [ebx], ax"			\
+	asm volatile (	"mov word ptr ds:[ebx], ax"		\
 					:								\
 					: "a" (value), "b" (address)	\
 					: );							\
 })
 
 #define mem_store_d(address, value) ({				\
-	asm volatile (	"mov dword [ebx], eax"			\
+	asm volatile (	"mov dword ptr ds:[ebx], eax"	\
 					:								\
 					: "a" (value), "b" (address)	\
 					: );							\
@@ -41,7 +41,7 @@
 
 #define mem_load_b(address) ({						\
 	uint8_t value;									\
-	asm volatile (	"mov al, byte [ebx]"			\
+	asm volatile (	"mov al, byte ptr ds:[ebx]"		\
 					: "=a" (value)					\
 					: "b" (address)					\
 					: );							\
@@ -50,7 +50,7 @@
 
 #define mem_load_w(address) ({						\
 	uint16_t value;									\
-	asm volatile (	"mov ax, word [ebx]"			\
+	asm volatile (	"mov ax, word ptr ds:[ebx]"		\
 					: "=a" (value)					\
 					: "b" (address)					\
 					: );							\
@@ -59,7 +59,7 @@
 
 #define mem_load_d(address) ({						\
 	uint32_t value;									\
-	asm volatile (	"mov eax, dword [ebx]"			\
+	asm volatile (	"mov eax, dword ptr ds:[ebx]"	\
 					: "=a" (value)					\
 					: "b" (address)					\
 					: );							\
@@ -69,28 +69,28 @@
 #elif defined(__64BIT__)	// 64-bit memory operations
 
 #define mem_store_b(address, value) ({				\
-	asm volatile (	"mov byte [rbx], al"			\
+	asm volatile (	"mov byte ptr ds:[rbx], al"		\
 					:								\
 					: "a" (value), "b" (address)	\
 					: );							\
 })
 
 #define mem_store_w(address, value) ({				\
-	asm volatile (	"mov word [rbx], ax"			\
+	asm volatile (	"mov word ptr ds:[rbx], ax"		\
 					:								\
 					: "a" (value), "b" (address)	\
 					: );							\
 })
 
 #define mem_store_d(address, value) ({				\
-	asm volatile (	"mov dword [rbx], eax"			\
+	asm volatile (	"mov dword ptr ds:[rbx], eax"	\
 					:								\
 					: "a" (value), "b" (address)	\
 					: );							\
 })
 
 #define mem_store_q(address, value) ({				\
-	asm volatile (	"mov qword [rbx], rax"			\
+	asm volatile (	"mov qword ptr ds:[rbx], rax"	\
 					:								\
 					: "a" (value), "b" (address)	\
 					: );							\
@@ -98,7 +98,7 @@
 
 #define mem_load_b(address) ({						\
 	uint8_t value;									\
-	asm volatile (	"mov al, byte [rbx]"			\
+	asm volatile (	"mov al, byte ptr ds:[rbx]"		\
 					: "=a" (value)					\
 					: "b" (address)					\
 					: );							\
@@ -107,7 +107,7 @@
 
 #define mem_load_w(address) ({						\
 	uint16_t value;									\
-	asm volatile (	"mov ax, word [rbx]"			\
+	asm volatile (	"mov ax, word ptr ds:[rbx]"		\
 					: "=a" (value)					\
 					: "b" (address)					\
 					: );							\
@@ -116,7 +116,7 @@
 
 #define mem_load_d(address) ({						\
 	uint32_t value;									\
-	asm volatile (	"mov eax, dword [rbx]"			\
+	asm volatile (	"mov eax, dword ptr ds:[rbx]"	\
 					: "=a" (value)					\
 					: "b" (address)					\
 					: );							\
@@ -125,7 +125,7 @@
 
 #define mem_load_q(address) ({						\
 	uint64_t value;									\
-	asm volatile (	"mov rax, qword [rbx]"			\
+	asm volatile (	"mov rax, qword ptr ds:[rbx]"	\
 					: "=a" (value)					\
 					: "b" (address)					\
 					: );							\

@@ -6,13 +6,13 @@
 #include "drivers/system.h"
 #include "drivers/textdrv.h"
 #include "drivers/ata.h"
+#include "drivers/memory.h"
 #include "drivers/paging.h"
 
 void _start(void) {
 
-	magic_breakpoint();
-
-	map_page(0x10121212121120, 0x7eeeeeec00);
+	char buf[17];
+	int block;
 
 	text_clear();
 
@@ -42,7 +42,19 @@ void _start(void) {
         ata_write28(ata0m, 1, (uint8_t*)0x7c00, 512);
         ata_flush(ata0m);
         ata_read28(ata0m, 1, 512);
-        
+
+		text_putstring("\nDetected memory blocks:\n");
+
+		for (block=0; block<6; block++) {
+			text_putstring("Block ");
+			text_putstring(itoa(block, buf, 16));
+			text_putstring("\nBase: ");
+			text_putstring(ltoa(mem_get_block_base(block), buf, 16));
+			text_putstring("\nSize: ");
+        	text_putstring(ltoa(mem_get_block_size(block), buf, 16));
+			text_putchar('\n');
+		}
+
 	system_halt();
 
 }

@@ -37,7 +37,7 @@ void draw_cursor(void) {
 void scroll(void) {
 	int offset;
 	char *vidmem = (char*) VIDEO_ADDRESS;
-	for (offset=0; offset<=VIDEO_BOTTOM-COLS; offset=offset+1) {
+	for (offset=0; offset<=VIDEO_BOTTOM-COLS; offset++) {
 		vidmem[offset] = vidmem[offset+COLS];
 	}
 	for (offset=VIDEO_BOTTOM; offset>VIDEO_BOTTOM-COLS; offset=offset-2) {
@@ -74,7 +74,11 @@ void text_putchar(char c) {
 	char *vidmem = (char*) VIDEO_ADDRESS;
 	if (c == 0x00) {
 	} else if (c == 0x0A) {
-		text_set_cursor_pos(0, (text_get_cursor_pos_y()+1));
+		if (text_get_cursor_pos_y() == 24) {
+			clear_cursor();
+			scroll();
+			text_set_cursor_pos(0, 24);
+		} else text_set_cursor_pos(0, (text_get_cursor_pos_y()+1));
 	} else if (c == 0x08) {
 		if (cursor_offset) {
 			clear_cursor();
@@ -85,7 +89,7 @@ void text_putchar(char c) {
 	} else {
 		clear_cursor();
 		vidmem[cursor_offset] = c;
-		if (cursor_offset == VIDEO_BOTTOM-1) {
+		if (cursor_offset >= VIDEO_BOTTOM-1) {
 			scroll();
 			cursor_offset = VIDEO_BOTTOM - (COLS-1);
 		} else {

@@ -4,8 +4,6 @@
 #include "../libs/stdint.h"
 #include "../libs/stddef.h"
 
-#define magic_breakpoint()		asm("xchg bx, bx");
-
 void system_halt(void);
 void port_out_b(uint16_t port, uint8_t value);
 void port_out_w(uint16_t port, uint16_t value);

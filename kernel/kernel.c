@@ -11,9 +11,6 @@
 
 void _start(void) {
 
-	char buf[17];
-	int block;
-
 	text_clear();
 
 	text_putchar(0x00);
@@ -42,29 +39,6 @@ void _start(void) {
         ata_write28(ata0m, 1, (uint8_t*)0x7c00, 512);
         ata_flush(ata0m);
         ata_read28(ata0m, 1, 512);
-
-		text_putstring("\nDetected memory blocks:\n");
-
-		for (block=0; block<6; block++) {
-			text_putstring("Block ");
-			text_putstring(itoa(block, buf, 16));
-			#if defined(__32BIT__)
-			text_putstring("\nBase: ");
-			text_putstring(itoa(mem_get_block_base(block), buf, 16));
-			text_putstring("\nSize: ");
-        	text_putstring(itoa(mem_get_block_size(block), buf, 16));
-			#elif defined(__64BIT__)
-			text_putstring("\nBase: ");
-			text_putstring(ltoa(mem_get_block_base(block), buf, 16));
-			text_putstring("\nSize: ");
-        	text_putstring(ltoa(mem_get_block_size(block), buf, 16));
-			#endif
-			text_putstring("\nType: ");
-        	text_putstring(itoa(mem_get_block_type(block), buf, 16));
-			text_putstring("\nExt: ");
-        	text_putstring(itoa(mem_get_block_ext(block), buf, 16));
-			text_putchar('\n');
-		}
 
 	system_halt();
 

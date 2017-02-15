@@ -68,6 +68,13 @@ long atol(const char *str)
  */
 char *itoa(int n, char *buf, int base)
 {
+	if ( n == 0 )
+	{
+		buf[0] = '0';
+		buf[1] = '\0';
+		return buf;
+	}
+
 	/* large enough to hold binary ~0 plus the null byte */
 	char tmp[(sizeof(int)*8)+1];
 	unsigned int m;
@@ -114,6 +121,13 @@ char *itoa(int n, char *buf, int base)
 
 char *ltoa(long n, char *buf, int base)
 {
+	if ( n == 0 )
+	{
+		buf[0] = '0';
+		buf[1] = '\0';
+		return buf;
+	}
+	
 	/* large enough to hold binary ~0 plus the null byte */
 	char tmp[(sizeof(long)*8)+1];
 	unsigned long m;

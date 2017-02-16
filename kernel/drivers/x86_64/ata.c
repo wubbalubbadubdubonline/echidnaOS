@@ -46,8 +46,8 @@ ata_device ata_identify(ata_device dev) {
     uint8_t status = port_in_b(dev.command_port);
     if (status == 0xFF) {
         dev.exists = 0;
-        text_putstring("No device found! A ");
-        return;
+        text_putstring("No device found!\n");
+        return dev;
     }
         
     port_out_b(dev.sector_count_port, 0);
@@ -61,8 +61,8 @@ ata_device ata_identify(ata_device dev) {
     
     if (status == 0x00) {
         dev.exists = 0;
-        text_putstring("No device found! B");
-        return;
+        text_putstring("No device found!\n");
+        return dev;
     }
     
     while (((status & 0x80) == 0x80)
@@ -71,18 +71,11 @@ ata_device ata_identify(ata_device dev) {
     
     if (status & 0x01) {
         dev.exists = 0;
-        text_putstring("Error occured!");
-        return;
+        text_putstring("Error occured!\n");
+        return dev;
     }
     
-    for (uint16_t i = 0; i < 256; i++) {
-        uint16_t data = port_in_b(dev.data_port);
-        char* foo = "  \0";
-        foo[1] = (data >> 8) & 0x00FF;
-        foo[0] = data & 0x00FF;
-        text_putstring(foo);
-        
-    }
+    text_putstring("Device successfully identified!\n");
     
     dev.exists = 1;
     
@@ -112,7 +105,7 @@ uint8_t* ata_read28(ata_device dev, uint32_t sector) {
         status = port_in_b(dev.command_port);
     
     if (status & 0x01) {
-        text_putstring("Error occured!");
+        text_putstring("Error occured!\n");
         return buffer;
     }
     
@@ -133,15 +126,12 @@ uint8_t* ata_read28(ata_device dev, uint32_t sector) {
     
 }
 
-
-
-
 void ata_write28(ata_device dev, uint32_t sector, uint8_t* data) {
     if (sector > 0x0FFFFFFF)
         return;
     
     if (dev.exists == 0) 
-        return buffer;
+        return;
 
     port_out_b(dev.device_port, (dev.master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
     port_out_b(dev.error_port, 0);
@@ -153,7 +143,7 @@ void ata_write28(ata_device dev, uint32_t sector, uint8_t* data) {
     
     port_out_b(dev.command_port, 0x30); // identify command
     
-    text_putstring("Writing to drive: \n");
+    text_putstring("Writing to drive!\n");
     
     for(int i = 0; i < 256; i ++) {
         int c = i * 2;
@@ -167,14 +157,14 @@ void ata_write28(ata_device dev, uint32_t sector, uint8_t* data) {
 
 void ata_flush(ata_device dev) {
     if (dev.exists == 0) 
-        return buffer;
+        return;
     
     port_out_b(dev.device_port, (dev.master ? 0xE0 : 0xF0));
     port_out_b(dev.command_port, 0xE7); // identify command
     
     uint8_t status = port_in_b(dev.command_port);
     if (status == 0x00) {
-        text_putstring("No device found!");
+        text_putstring("No device found!\n");
         return;
     }
     
@@ -183,7 +173,7 @@ void ata_flush(ata_device dev) {
         status = port_in_b(dev.command_port);
     
     if (status & 0x01) {
-        text_putstring("Error occured!");
+        text_putstring("Error occured!\n");
         return;
     }
 }

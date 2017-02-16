@@ -97,7 +97,7 @@ uint8_t* ata_read28(ata_device dev, uint32_t sector) {
     port_out_b(dev.lba_mid_port, (sector & 0x0000FF00) >> 8);
     port_out_b(dev.lba_hi_port, (sector & 0x00FF0000) >> 16);
     
-    port_out_b(dev.command_port, 0x20); // identify command
+    port_out_b(dev.command_port, 0x20); // read command
  
     uint8_t status = port_in_b(dev.command_port);
     while (((status & 0x80) == 0x80)

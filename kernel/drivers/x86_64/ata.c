@@ -2,6 +2,22 @@
 
 uint8_t buffer[512];
 
+ata_device devices[4];
+
+ata_device* get_ata_devices() {
+    
+    devices[0] = init_ata_device(0x1F0, 1);
+    devices[0] = ata_identify(devices[0]);
+    devices[1] = init_ata_device(0x1F0, 0);
+    devices[1] = ata_identify(devices[1]);
+    devices[2] = init_ata_device(0x170, 1);
+    devices[2] = ata_identify(devices[2]);
+    devices[3] = init_ata_device(0x170, 0);
+    devices[3] = ata_identify(devices[3]);
+    
+    return devices;
+}
+
 ata_device init_ata_device(uint16_t port_base, uint8_t master) {
     ata_device dev;
     
@@ -14,6 +30,7 @@ ata_device init_ata_device(uint16_t port_base, uint8_t master) {
     dev.device_port = port_base + 0x06;
     dev.command_port = port_base + 0x07;
     dev.control_port = port_base + 0x206;
+    dev.exists = 0;
     dev.master = master;
     
     dev.bytes_per_sector = 512;
@@ -21,13 +38,14 @@ ata_device init_ata_device(uint16_t port_base, uint8_t master) {
     return dev;
 }
 
-void ata_identify(ata_device dev) {
+ata_device ata_identify(ata_device dev) {
 
     port_out_b(dev.device_port, dev.master ? 0xA0 : 0xB0);
     //port_out_b(dev.control_port, 0);
     
     uint8_t status = port_in_b(dev.command_port);
     if (status == 0xFF) {
+        dev.exists = 0;
         text_putstring("No device found! A ");
         return;
     }
@@ -42,6 +60,7 @@ void ata_identify(ata_device dev) {
     status = port_in_b(dev.command_port);
     
     if (status == 0x00) {
+        dev.exists = 0;
         text_putstring("No device found! B");
         return;
     }
@@ -51,6 +70,7 @@ void ata_identify(ata_device dev) {
         status = port_in_b(dev.command_port);
     
     if (status & 0x01) {
+        dev.exists = 0;
         text_putstring("Error occured!");
         return;
     }
@@ -63,10 +83,17 @@ void ata_identify(ata_device dev) {
         text_putstring(foo);
         
     }
+    
+    dev.exists = 1;
+    
+    return dev;
 }
 
 uint8_t* ata_read28(ata_device dev, uint32_t sector) {
     if (sector > 0x0FFFFFFF)
+        return buffer;
+    
+    if (dev.exists == 0) 
         return buffer;
 
     port_out_b(dev.device_port, (dev.master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
@@ -112,6 +139,9 @@ uint8_t* ata_read28(ata_device dev, uint32_t sector) {
 void ata_write28(ata_device dev, uint32_t sector, uint8_t* data) {
     if (sector > 0x0FFFFFFF)
         return;
+    
+    if (dev.exists == 0) 
+        return buffer;
 
     port_out_b(dev.device_port, (dev.master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
     port_out_b(dev.error_port, 0);
@@ -136,6 +166,9 @@ void ata_write28(ata_device dev, uint32_t sector, uint8_t* data) {
 }
 
 void ata_flush(ata_device dev) {
+    if (dev.exists == 0) 
+        return buffer;
+    
     port_out_b(dev.device_port, (dev.master ? 0xE0 : 0xF0));
     port_out_b(dev.command_port, 0xE7); // identify command
     

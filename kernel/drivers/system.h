@@ -8,6 +8,10 @@
 	asm volatile ("cli; hlt");				\
 })
 
+#define system_soft_halt() ({				\
+	asm volatile ("hlt");					\
+})
+
 #define disable_ints() ({					\
 	asm volatile ("cli");					\
 })

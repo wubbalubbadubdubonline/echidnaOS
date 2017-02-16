@@ -25,8 +25,8 @@ void _start(void) {
 	load_idt(0x80000);
 	text_putstring(" Done.\n");
 
-        ata_device[4] devices = get_ata_devices();
-        
+	ata_device* devices = get_ata_devices();
+
 	text_putstring("\nHalting system.");
 	system_halt();
 

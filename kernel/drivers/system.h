@@ -16,6 +16,13 @@
 	asm volatile ("sti");					\
 })
 
+#define load_idt(location) ({				\
+	asm volatile (	"lidt [ebx]"			\
+					:						\
+					: "b" (location)		\
+					: );					\
+})
+
 #if defined(__32BIT__)		// 32-bit memory operations
 
 #define mem_store_b(address, value) ({				\

@@ -8,17 +8,19 @@
 #include "drivers/ata.h"
 #include "drivers/memory.h"
 #include "drivers/paging.h"
+#include "drivers/pic.h"
 
 void _start(void) {
 
-	uint16_t x;
-
 	text_clear();
 
-	text_putstring("echidnaOS\n");
+	text_putstring("echidnaOS\n\n");
 
-	asm("xchg bx,bx");
-	x=mem_load_w(0x7DFE);
+	text_putstring("Initialising PIC...");
+
+	map_PIC(0x20, 0x28);
+
+	text_putstring("Done.\n");
 
 	system_halt();
 

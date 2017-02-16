@@ -5,7 +5,7 @@
 #include "../libs/stddef.h"
 
 
-//to be written
+void map_PIC(uint8_t PIC0Offset, uint8_t PIC1Offset);
 
 
 #endif

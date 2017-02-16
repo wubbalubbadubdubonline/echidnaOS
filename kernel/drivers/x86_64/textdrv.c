@@ -1,4 +1,5 @@
 #include "../textdrv.h"
+#include "../system.h"
 
 /* internal defines */
 
@@ -23,26 +24,25 @@ char text_palette = 0x70;
 /* internal functions */
 
 void clear_cursor(void) {
-	char *vidmem = (char*) VIDEO_ADDRESS;
-	vidmem[cursor_offset+1] = text_palette;
+	mem_store_b(VIDEO_ADDRESS+cursor_offset+1, text_palette);
 }
 
 void draw_cursor(void) {
-	char *vidmem = (char*) VIDEO_ADDRESS;
 	if (cursor_status) {
-		vidmem[cursor_offset+1] = cursor_palette;
+		mem_store_b(VIDEO_ADDRESS+cursor_offset+1, cursor_palette);
 	}
 }
 
 void scroll(void) {
 	int offset;
-	char *vidmem = (char*) VIDEO_ADDRESS;
+	// move the text up by one row
 	for (offset=0; offset<=VIDEO_BOTTOM-COLS; offset++) {
-		vidmem[offset] = vidmem[offset+COLS];
+		mem_store_b(VIDEO_ADDRESS+offset, mem_load_b(VIDEO_ADDRESS+offset+COLS));
 	}
+	// clear the last line of the screen
 	for (offset=VIDEO_BOTTOM; offset>VIDEO_BOTTOM-COLS; offset=offset-2) {
-		vidmem[offset] = text_palette;
-		vidmem[offset-1] = ' ';
+		mem_store_b(VIDEO_ADDRESS+offset, text_palette);
+		mem_store_b(VIDEO_ADDRESS+offset-1, ' ');
 	}
 }
 
@@ -50,11 +50,10 @@ void scroll(void) {
 
 void text_clear(void) {
 	int offset;
-	char *vidmem = (char*) VIDEO_ADDRESS;
 	clear_cursor();
 	for (offset=0; offset<VIDEO_BOTTOM; offset=offset+2) {
-		vidmem[offset] = ' ';
-		vidmem[offset+1] = text_palette;
+		mem_store_b(VIDEO_ADDRESS+offset, ' ');
+		mem_store_b(VIDEO_ADDRESS+offset+1, text_palette);
 	}
 	cursor_offset=0;
 	draw_cursor();
@@ -71,7 +70,6 @@ void text_disable_cursor(void) {
 }
 
 void text_putchar(char c) {
-	char *vidmem = (char*) VIDEO_ADDRESS;
 	if (c == 0x00) {
 	} else if (c == 0x0A) {
 		if (text_get_cursor_pos_y() == 24) {
@@ -83,12 +81,12 @@ void text_putchar(char c) {
 		if (cursor_offset) {
 			clear_cursor();
 			cursor_offset = cursor_offset-2;
-			vidmem[cursor_offset] = ' ';
+			mem_store_b(VIDEO_ADDRESS+cursor_offset, ' ');
 			draw_cursor();
 		}
 	} else {
 		clear_cursor();
-		vidmem[cursor_offset] = c;
+		mem_store_b(VIDEO_ADDRESS+cursor_offset, c);
 		if (cursor_offset >= VIDEO_BOTTOM-1) {
 			scroll();
 			cursor_offset = VIDEO_BOTTOM - (COLS-1);

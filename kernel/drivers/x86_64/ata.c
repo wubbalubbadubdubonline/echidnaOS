@@ -1,5 +1,7 @@
 #include "../ata.h"
 
+uint8_t buffer[512];
+
 ata_device init_ata_device(uint16_t port_base, uint8_t master) {
     ata_device dev;
     
@@ -63,9 +65,9 @@ void ata_identify(ata_device dev) {
     }
 }
 
-void ata_read28(ata_device dev, uint32_t sector, int count) {
+uint8_t* ata_read28(ata_device dev, uint32_t sector) {
     if (sector > 0x0FFFFFFF)
-        return;
+        return buffer;
 
     port_out_b(dev.device_port, (dev.master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
     port_out_b(dev.error_port, 0);
@@ -84,41 +86,31 @@ void ata_read28(ata_device dev, uint32_t sector, int count) {
     
     if (status & 0x01) {
         text_putstring("Error occured!");
-        return;
+        return buffer;
     }
     
-    text_putstring("Reading drive: \n");
+    text_putstring("Reading from drive!\n");
     
     uint8_t* v = (uint8_t*) 0xb8000;
     
-    for(int i = 0; i < count; i += 2) {
+    for(int i = 0; i < 256; i ++) {
         uint16_t wdata = port_in_w(dev.data_port);
         
-        char *text = "  \0";
-        text[0] = wdata & 0xFF;
-        
-        if(i+1 < count)
-            text[1] = (wdata >> 8) & 0xFF;
-        else
-            text[1] = '\0';
-        text_putstring(text);
-        
+        int c = i * 2;
+        buffer[c] = wdata & 0xFF;
+        buffer[c + 1] = (wdata >> 8) & 0xFF;
         
     } 
     
-    for(int i = count + (count%2); i < 512; i += 2) {
-        port_in_b(dev.data_port);
-    }
+    return buffer;
     
 }
 
 
 
 
-void ata_write28(ata_device dev, uint32_t sector, uint8_t* data, int count) {
+void ata_write28(ata_device dev, uint32_t sector, uint8_t* data) {
     if (sector > 0x0FFFFFFF)
-        return;
-    if (count > 512)
         return;
 
     port_out_b(dev.device_port, (dev.master ? 0xE0 : 0xF0) | ((sector & 0x0F000000) >> 24));
@@ -133,18 +125,13 @@ void ata_write28(ata_device dev, uint32_t sector, uint8_t* data, int count) {
     
     text_putstring("Writing to drive: \n");
     
-    for(int i = 0; i < count; i += 2) {
-        uint16_t wdata = data[i];
+    for(int i = 0; i < 256; i ++) {
+        int c = i * 2;
         
-        if (i+1 < count)
-            wdata |= ((uint16_t)data[i+1]) << 8;
+        uint16_t wdata = (data[c + 1] << 8)| data[c];
         
         port_out_w(dev.data_port, wdata);
     } 
-    
-    for(int i = count + (count%2); i < 512; i += 2) {
-        port_out_w(dev.data_port, 0x0000);
-    }
     
 }
 

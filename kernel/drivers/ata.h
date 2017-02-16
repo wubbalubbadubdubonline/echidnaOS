@@ -26,6 +26,6 @@ struct ata_device {
 
 ata_device init_ata_device(uint16_t port_base, uint8_t master);
 void ata_identify(ata_device dev);
-void ata_read28(ata_device dev, uint32_t sector, int count);
-void ata_write28(ata_device dev, uint32_t sector, uint8_t* data, int count);
+uint8_t* ata_read28(ata_device dev, uint32_t sector);
+void ata_write28(ata_device dev, uint32_t sector, uint8_t* data);
 #endif

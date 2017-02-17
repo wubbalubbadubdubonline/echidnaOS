@@ -1,4 +1,5 @@
 #include "partition.h"
+#include "../drivers/system.h"
 
 partition get_partition(uint8_t id, ata_device dev) {
     partition partition;
@@ -11,12 +12,19 @@ partition get_partition(uint8_t id, ata_device dev) {
     
     uint8_t* sector = ata_read28(dev, 0);
 
+    // validity check
+    if (sector[510] == 0x55 && sector[511] == 0xAA) {
+    } else {
+        text_putstring("Drive not bootable!");
+        return partition;
+    }  
+    
     // ----------------
     
     partition.status = sector[addr];
     partition.type = sector[addr + 4];
-    partition.start_lba = (sector[addr + 8 + 3] >> 24) | (sector[addr + 8 + 2] >> 16) | (sector[addr + 8 + 1] >> 8) | sector[addr + 8];
-    partition.sector_count = (sector[addr + 12 + 3] >> 24) | (sector[addr + 12 + 2] >> 16) | (sector[addr + 12 + 1] >> 8) | sector[addr + 12];
+    partition.start_lba = mem_load_d(sector + addr + 8);
+    partition.sector_count = mem_load_d(sector + addr + 0xC);
     partition.exists = 1;
     
     return partition;

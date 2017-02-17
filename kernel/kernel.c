@@ -95,15 +95,74 @@ void _start(void) {
         itoa(part.type, buf, 16);
         text_putstring(buf);
         text_putchar('\n');
-        
+
+        char bufa[9] = {0};        
         text_putstring("First sector: ");
-        itoa(part.start_lba, buf, 10);
-        text_putstring(buf);
+        itoa(part.start_lba, bufa, 16);
+        text_putstring(bufa);
+        text_putchar('\n');
+
+        char bufb[9] = {0};
+        text_putstring("Sector count: ");
+        itoa(part.sector_count, bufb, 16);
+        text_putstring(bufb);
         text_putchar('\n');
         
-        text_putstring("Sector count: ");
-        itoa(part.sector_count, buf, 10);
+        
+        // -----------
+        part = get_partition(1, devices[0]);
+        
+        text_putstring("Partition type: ");
+        itoa(part.type, buf, 16);
         text_putstring(buf);
+        text_putchar('\n');
+
+        text_putstring("First sector: ");
+        itoa(part.start_lba, bufa, 16);
+        text_putstring(bufa);
+        text_putchar('\n');
+
+        text_putstring("Sector count: ");
+        itoa(part.sector_count, bufb, 16);
+        text_putstring(bufb);
+        text_putchar('\n');
+        
+        
+        // -----------
+        part = get_partition(2, devices[0]);
+        
+        text_putstring("Partition type: ");
+        itoa(part.type, buf, 16);
+        text_putstring(buf);
+        text_putchar('\n');
+
+        text_putstring("First sector: ");
+        itoa(part.start_lba, bufa, 16);
+        text_putstring(bufa);
+        text_putchar('\n');
+
+        text_putstring("Sector count: ");
+        itoa(part.sector_count, bufb, 16);
+        text_putstring(bufb);
+        text_putchar('\n');
+        
+        
+        // -----------
+        part = get_partition(3, devices[0]);
+        
+        text_putstring("Partition type: ");
+        itoa(part.type, buf, 16);
+        text_putstring(buf);
+        text_putchar('\n');
+
+        text_putstring("First sector: ");
+        itoa(part.start_lba, bufa, 16);
+        text_putstring(bufa);
+        text_putchar('\n');
+
+        text_putstring("Sector count: ");
+        itoa(part.sector_count, bufb, 16);
+        text_putstring(bufb);
         text_putchar('\n');
         
 	text_putstring("\nSoft halting system.");

@@ -5,7 +5,7 @@ ASM_OBJ = ${ASM_FILES:.asm=.o}
 OBJ = ${C_OBJ} ${ASM_OBJ}
 
 CFLAGS = -std=gnu99 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -masm=intel
-LDFLAGS = -Ttext 0x100000 -Tdata 0x180000 --oformat binary
+LDFLAGS = -T linker_script --oformat binary
 
 ifeq (${ARCH}, i386)
 ARCHCFLAGS = -m32 -D__32BIT__

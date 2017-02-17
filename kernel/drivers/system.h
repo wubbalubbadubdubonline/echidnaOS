@@ -9,7 +9,7 @@
 })
 
 #define system_soft_halt() ({				\
-	asm volatile ("hlt");					\
+	asm volatile ("1: hlt; jmp 1b");		\
 })
 
 #define disable_ints() ({					\

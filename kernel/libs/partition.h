@@ -4,6 +4,7 @@
 #include "../drivers/ata.h"
 
 typedef struct partition partition;
+typedef struct partition_table partition_table;
 typedef struct extended_partition extended_partition;
 
 struct partition {
@@ -26,8 +27,12 @@ struct extended_partition {
     uint8_t exists;
 };
 
+struct partition_table {
+    partition partitions[8];
+};
+
 partition get_partition(uint8_t id, ata_device dev);
 extended_partition get_extended_partition(partition partition, ata_device dev);
-void enumerate_partitions(ata_device dev);
+partition_table enumerate_partitions(ata_device dev);
 
 #endif

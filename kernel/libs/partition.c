@@ -2,6 +2,8 @@
 #include "../drivers/system.h"
 #include "stdlib.h"
 
+static partition_table table;
+
 char* names[] = {"Empty", 
                       "FAT12",
                       "XENIX root",
@@ -101,10 +103,10 @@ extended_partition get_extended_partition(partition partition, ata_device dev) {
     return ext_partition;
 }
 
-void enumerate_partitions(ata_device dev) {
+partition_table enumerate_partitions(ata_device dev) {
     
-    
-    uint8_t id;
+    uint8_t table_id = 0;
+    uint8_t id = 0;
     
     text_putstring("Enumerating partitions: \n");
     
@@ -156,14 +158,29 @@ void enumerate_partitions(ata_device dev) {
                         itoa(part_.sector_count, buf, 16);
                         text_putstring(buf);
                         text_putchar('\n');
+                        
+                        // ------------------------
+                        table.partitions[table_id].status = part_.status;
+                        table.partitions[table_id].type = part_.type;
+                        table.partitions[table_id].start_lba = part_.start_lba;
+                        table.partitions[table_id].sector_count = part_.sector_count;
+                        table.partitions[table_id].exists = part_.exists;
+                        table_id++;
                     }
                 }
                 
+            } else {
+                table.partitions[table_id].status = part.status;
+                table.partitions[table_id].type = part.type;
+                table.partitions[table_id].start_lba = part.start_lba;
+                table.partitions[table_id].sector_count = part.sector_count;
+                table.partitions[table_id].exists = part.exists;
+                table_id++;
             }
             
         }
         
     }
     
-    
+    return table;
 }

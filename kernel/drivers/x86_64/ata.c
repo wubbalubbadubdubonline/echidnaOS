@@ -108,9 +108,7 @@ uint8_t* ata_read28(ata_device dev, uint32_t sector) {
         text_putstring("Error occured!\n");
         return buffer;
     }
-    
-    text_putstring("Reading from drive!\n");
-    
+        
     uint8_t* v = (uint8_t*) 0xb8000;
     
     for(int i = 0; i < 256; i ++) {
@@ -142,9 +140,7 @@ void ata_write28(ata_device dev, uint32_t sector, uint8_t* data) {
     port_out_b(dev.lba_hi_port, (sector & 0x00FF0000) >> 16);
     
     port_out_b(dev.command_port, 0x30); // identify command
-    
-    text_putstring("Writing to drive!\n");
-    
+        
     for(int i = 0; i < 256; i ++) {
         int c = i * 2;
         

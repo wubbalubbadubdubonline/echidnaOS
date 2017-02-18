@@ -10,6 +10,12 @@ mov word [0x0072], 0x0000
 
 sti
 
+; ***** 80x50 text mode *****
+
+mov ax, 1112h                                   ; Set params
+xor bx, bx                                      ; Default font(hopefully exists)
+int 10h                                         ; Set mode using a bios interrupt
+
 ; ***** A20 *****
 
 mov si, A20Msg					; Display A20 message

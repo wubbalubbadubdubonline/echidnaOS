@@ -4,8 +4,8 @@
 /* internal defines */
 
 #define VIDEO_ADDRESS 0xB8000
-#define VIDEO_BOTTOM 0xF9F
-#define ROWS 25
+#define VIDEO_BOTTOM 0x1F3F
+#define ROWS 50
 #define COLS 160
 
 /* internal functions */
@@ -72,10 +72,10 @@ void text_disable_cursor(void) {
 void text_putchar(char c) {
 	if (c == 0x00) {
 	} else if (c == 0x0A) {
-		if (text_get_cursor_pos_y() == 24) {
+		if (text_get_cursor_pos_y() == ROWS - 1) {
 			clear_cursor();
 			scroll();
-			text_set_cursor_pos(0, 24);
+			text_set_cursor_pos(0,  ROWS - 1);
 		} else text_set_cursor_pos(0, (text_get_cursor_pos_y()+1));
 	} else if (c == 0x08) {
 		if (cursor_offset) {

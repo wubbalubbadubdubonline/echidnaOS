@@ -22,10 +22,6 @@ sti
 
 mov byte [drive_number], dl		; Save boot drive in memory
 
-mov ah, 0x01					; Disable VGA cursor
-mov cx, 0x2607
-int 0x10
-
 mov si, LoadingMsg				; Print loading message using simple print (BIOS)
 call simple_print
 

@@ -10,12 +10,6 @@ mov word [0x0072], 0x0000
 
 sti
 
-; ***** 80x50 text mode *****
-
-mov ax, 1112h                                   ; Set params
-xor bx, bx                                      ; Default font(hopefully exists)
-int 10h                                         ; Set mode using a bios interrupt
-
 ; ***** A20 *****
 
 mov si, A20Msg					; Display A20 message
@@ -96,6 +90,16 @@ call sleep
 
 mov si, DoneMsg
 call simple_print				; Display done message
+
+; ***** 80x50 text mode, disable hardware cursor *****
+
+mov ax, 1112h                                   ; Set params
+xor bx, bx                                      ; Default font(hopefully exists)
+int 10h                                         ; Set mode using a bios interrupt
+
+mov ah, 0x01					; Disable VGA cursor
+mov cx, 0x2607
+int 0x10
 
 jmp arch_specific
 

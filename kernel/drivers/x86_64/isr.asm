@@ -8,35 +8,35 @@ section .data
 
 section .text
 
-bits 32
+bits 64
 
 handler_simple:
-	iret
+	iretq
 
 handler_code:
-	add esp, 4
-	iret
+	add rsp, 4
+	iretq
 
 handler_irq_pic0:
-	push eax
+	push rax
 	mov al, 0x20	; acknowledge interrupt to PIC0
 	out 0x20, al
-	pop eax
-	iret
+	pop rax
+	iretq
 
 handler_irq_pic1:
-	push eax
+	push rax
 	mov al, 0x20	; acknowledge interrupt to both PICs
 	out 0xA0, al
 	out 0x20, al
-	pop eax
-	iret
+	pop rax
+	iretq
 
 keyboard_isr:
 	xchg bx, bx
-	push eax
+	push rax
 	in al, 0x60		; read from keyboard
 	mov al, 0x20	; acknowledge interrupt to PIC0
 	out 0x20, al
-	pop eax
-	iret
+	pop rax
+	iretq

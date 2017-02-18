@@ -6,8 +6,6 @@
 #include "drivers/system.h"
 #include "drivers/textdrv.h"
 #include "drivers/ata.h"
-#include "drivers/memory.h"
-#include "drivers/paging.h"
 #include "drivers/pic.h"
 #include "drivers/idt.h"
 

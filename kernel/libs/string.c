@@ -96,7 +96,7 @@ char *strncat(char *dest, const char *src, size_t len)
   return ret;
 }
 
-char *strchr(const char *str, int ch)
+char *strchr(char *str, int ch)
 {
   for ( ; *str ; str++ )
     if ( *str == (char)ch )
@@ -105,9 +105,9 @@ char *strchr(const char *str, int ch)
   return NULL;
 }
 
-char *strrchr(const char *str, int ch)
+char *strrchr(char *str, int ch)
 {
-  const char *sp = NULL;
+  char *sp = NULL;
 
   for ( ; *str; str++)
     if ( *str == (char)ch )
@@ -117,7 +117,7 @@ char *strrchr(const char *str, int ch)
 }
 
 /* brace pyramids are abominations, but it's more readable this way >:( */
-char *strstr(const char *str1, const char *str2)
+char *strstr(char *str1, const char *str2)
 {
 
   for (size_t i = 0; *str1; str1++, i = 0 )
@@ -180,7 +180,7 @@ void *memmove(void *dest, const void *src, size_t len)
   return memcpy(dest, cpy, len);
 }
 
-void *memchr(const void *haystack, int needle, size_t size)
+void *memchr(void *haystack, int needle, size_t size)
 {
   for ( ; size--; haystack++ )
     if ( *(char *)haystack == (char)needle )

@@ -14,16 +14,16 @@ char  *strncpy(char *, const char *, size_t);
 char  *strcat(char *, const char *);
 char  *strncat(char *, const char *, size_t);
 
-char  *strchr(const char *, int);
-char  *strrchr(const char *, int);
-char  *strstr(const char *, const char *);
+char  *strchr(char *, int);
+char  *strrchr(char *, int);
+char  *strstr(char *, const char *);
 
 void  *memset(void *, int, size_t);
 int    memcmp(const void *, const void *, size_t);
 void  *memcpy(void *, const void *, size_t);
 void  *memmove(void *, const void *, size_t);
 
-void  *memchr(const void *, int, size_t);
+void  *memchr(void *, int, size_t);
 
 
 #endif

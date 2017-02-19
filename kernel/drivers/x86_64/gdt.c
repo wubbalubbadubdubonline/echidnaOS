@@ -4,7 +4,7 @@
 #define GDT_ENTRIES 0x05
 #define GDT_LENGTH (GDT_ENTRIES*8)
 
-char GDT_pointer[6];
+char GDT_pointer[10];
 char GDT[GDT_LENGTH];
 
 void build_gdt_pointer(void);
@@ -12,7 +12,7 @@ void build_gdt_entry(uint8_t entry, uint8_t access);
 
 void build_gdt_pointer(void) {
 	mem_store_w(GDT_pointer, GDT_LENGTH-1);	// gdt length
-	mem_store_d(GDT_pointer+2, GDT);		// gdt start
+	mem_store_q(GDT_pointer+2, GDT);		// gdt start
 	load_gdt(GDT_pointer);					// load the GDT register
 }
 
@@ -21,11 +21,11 @@ void build_gdt_entry(uint8_t entry, uint8_t access) {
 		mem_store_d((entry*8)+GDT, 0x00000000);			// null descriptor
 		mem_store_d((entry*8)+GDT+4, 0x00000000);		// null descriptor
 	} else {
-		mem_store_w((entry*8)+GDT, 0xFFFF);				// limit
+		mem_store_w((entry*8)+GDT, 0x0000);				// limit
 		mem_store_w((entry*8)+GDT+2, 0x0000);			// base low-16
 		mem_store_b((entry*8)+GDT+4, 0x00);				// base mid-8
 		mem_store_b((entry*8)+GDT+5, access);			// access
-		mem_store_b((entry*8)+GDT+6, 0b11001111);		// granularity
+		mem_store_b((entry*8)+GDT+6, 0b00100000);		// granularity
 		mem_store_b((entry*8)+GDT+7, 0x00);				// base high-8
 	}
 }

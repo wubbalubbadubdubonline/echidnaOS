@@ -1,10 +1,12 @@
 #include "../idt.h"
 #include "../system.h"
 
-#define KERNEL_SELECTOR 0x18
+#define KERNEL_SELECTOR 0x08
+#define IDT_ENTRIES 0x31
+#define IDT_LENGTH (IDT_ENTRIES*8)
 
 char IDT_pointer[6];
-char IDT[0x188];
+char IDT[IDT_LENGTH];
 
 // ISRs
 void handler_simple(void);
@@ -13,15 +15,15 @@ void handler_irq_pic0(void);
 void handler_irq_pic1(void);
 void keyboard_isr(void);
 
-// ISRs pointers
+// internal functions
 
 void build_pointer(void);
 void build_idt_entry(uint8_t vector, uint16_t selector, uint32_t offset, uint8_t type);
 
 void build_pointer(void) {
-	mem_store_w(IDT_pointer, 0x187);	// idt length
-	mem_store_d(IDT_pointer+2, IDT);	// idt start
-	load_idt(IDT_pointer);				// load the IDT register
+	mem_store_w(IDT_pointer, IDT_LENGTH-1);	// idt length
+	mem_store_d(IDT_pointer+2, IDT);		// idt start
+	load_idt(IDT_pointer);					// load the IDT register
 }
 
 void build_idt_entry(uint8_t vector, uint16_t selector, uint32_t offset, uint8_t type) {

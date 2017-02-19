@@ -20,12 +20,39 @@
 	asm volatile ("sti");					\
 })
 
+#if defined(__32BIT__)			// 32-bit lgdt/lidt
+
 #define load_idt(location) ({				\
 	asm volatile (	"lidt [ebx]"			\
 					:						\
 					: "b" (location)		\
 					: );					\
 })
+
+#define load_gdt(location) ({				\
+	asm volatile (	"lgdt [ebx]"			\
+					:						\
+					: "b" (location)		\
+					: );					\
+})
+
+#elif defined(__64BIT__)		// 64-bit lgdt/lidt
+
+#define load_idt(location) ({				\
+	asm volatile (	"lidt [rbx]"			\
+					:						\
+					: "b" (location)		\
+					: );					\
+})
+
+#define load_gdt(location) ({				\
+	asm volatile (	"lgdt [rbx]"			\
+					:						\
+					: "b" (location)		\
+					: );					\
+})
+
+#endif
 
 #if defined(__32BIT__)		// 32-bit memory operations
 

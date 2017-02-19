@@ -7,6 +7,7 @@
 #include "drivers/textdrv.h"
 #include "drivers/ata.h"
 #include "drivers/pic.h"
+#include "drivers/gdt.h"
 #include "drivers/idt.h"
 
 void _start(void) {
@@ -16,13 +17,17 @@ void _start(void) {
 	text_putstring("echidnaOS\n\n");
 
 	text_putstring("Initialising PIC...");
-	map_PIC(0x20, 0x28);
+
+	map_PIC(0x20, 0x28);	// map the PIC0 at int 0x20-0x27 and PIC1 at 0x28-0x2F
+
 	text_putstring(" Done.\n");
 
-	text_putstring("Building IDT...");
+	text_putstring("Building descriptor tables...");
 
+	create_GDT();		// build the GDT
 	create_IDT();		// build the IDT
 
+	load_segments();	// activate the GDT
 	enable_ints();		// activate the IDT
 
 	text_putstring(" Done.\n");

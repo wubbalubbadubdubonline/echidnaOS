@@ -1,4 +1,4 @@
-#include "../ata.h"
+#include "ata.h"
 
 uint8_t buffer[512];
 

@@ -38,10 +38,10 @@ call simple_print				; Display done message
 mov si, KernelMsg				; Show loading kernel message
 call simple_print
 
-; Load the kernel to 0x100000
+; Load the kernel to 0x800000
 
 mov si, kernel_name
-mov ebx, 0x100000				; Load to offset 0x100000
+mov ebx, 0x800000				; Load to offset 0x800000
 call load_file
 
 jc err							; Catch any error

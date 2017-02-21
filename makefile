@@ -1,23 +1,12 @@
-C_FILES = $(wildcard kernel/*.c wildcard kernel/libs/*.c wildcard kernel/drivers/${ARCH}/*.c)
-ASM_FILES = $(wildcard kernel/drivers/${ARCH}/*.asm)
+C_FILES = $(wildcard kernel/*.c wildcard kernel/libs/*.c wildcard kernel/drivers/*.c)
+ASM_FILES = $(wildcard kernel/drivers/*.asm)
 C_OBJ = ${C_FILES:.c=.o}
 ASM_OBJ = ${ASM_FILES:.asm=.o}
 OBJ = ${C_OBJ} ${ASM_OBJ}
 
-CFLAGS = -std=gnu99 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -masm=intel
-LDFLAGS = -T linker_script --oformat binary
-
-ifeq (${ARCH}, i386)
-ARCHCFLAGS = -m32 -D__32BIT__
-ARCHLDFLAGS = -melf_i386
-ARCHNASMFLAGS = -f elf32
-else ifeq (${ARCH}, x86_64)
-ARCHCFLAGS = -m64 -D__64BIT__
-ARCHLDFLAGS = -melf_x86_64
-ARCHNASMFLAGS = -f elf64
-else
-$(error ARCH variable invalid, available architectures: i386, x86_64)
-endif
+CFLAGS = -std=gnu99 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -masm=intel -m32
+LDFLAGS = -T linker_script --oformat binary -melf_i386
+NASMFLAGS = -f elf32
 
 echidna.img: kernel.sys bootloader.bin
 	cp bootloader.bin echidna.img
@@ -32,17 +21,17 @@ echidna.img: kernel.sys bootloader.bin
 	rm -rf mnt
 	rm -rf ${OBJ} bootloader.bin kernel.sys
 
-bootloader.bin: bootloader/bootloader_${ARCH}.asm
-	nasm bootloader/bootloader_${ARCH}.asm -f bin -o bootloader.bin
+bootloader.bin: bootloader/bootloader.asm
+	nasm bootloader/bootloader.asm -f bin -o bootloader.bin
 
 kernel.sys: ${OBJ}
-	ld ${LDFLAGS} ${ARCHLDFLAGS} $^ -o $@
+	ld ${LDFLAGS} $^ -o $@
 
 %.o: %.c
-	gcc ${CFLAGS} ${ARCHCFLAGS} -c $< -o $@
+	gcc ${CFLAGS} -c $< -o $@
 
 %.o: %.asm
-	nasm $< ${ARCHNASMFLAGS} -o $@
+	nasm $< ${NASMFLAGS} -o $@
 
 clean:
 	rm -rf mnt

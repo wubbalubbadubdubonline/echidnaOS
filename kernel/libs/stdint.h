@@ -7,19 +7,11 @@
 typedef char			int8_t;
 typedef short			int16_t;
 typedef int			int32_t;
-#if defined(__32BIT__)
 typedef long long		int64_t;
-#elif defined(__64BIT__)
-typedef long			int64_t;
-#endif
 typedef unsigned char		uint8_t;
 typedef unsigned short		uint16_t;
 typedef unsigned int		uint32_t;
-#if defined(__32BIT__)
 typedef unsigned long long	uint64_t;
-#elif defined(__64BIT__)
-typedef unsigned long		uint64_t;
-#endif
 
 #define SIZE_MAX		((size_t)0x7FFFFFFF)
 #define PTRDIFF_MAX		((ptrdiff_t)0x7FFFFFFFFFFFFFFF)
@@ -41,20 +33,12 @@ typedef unsigned long		uint64_t;
 #define INT8_C(n)		(##nSS)
 #define INT16_C(n)		(##nS)
 #define INT32_C(n)		(##n)
-#if defined(__32BIT__)
 #define INT64_C(n)		(##nLL)
-#elif defined(__64BIT__)
-#define INT64_C(n)		(##nL)
-#endif
 
 #define UINT8_C(n)		(##nSSU)
 #define UINT16_C(n)		(##nSU)
 #define UINT32_C(n)		(##nU)
-#if defined(__32BIT__)
 #define UINT64_C(n)		(##nLLU)
-#elif defined(__64BIT__)
-#define UINT64_C(n)		(##nLU)
-#endif
 
 
 #endif

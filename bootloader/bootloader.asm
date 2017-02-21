@@ -18,8 +18,8 @@ xor esi, esi
 xor edi, edi
 xor ebp, ebp
 
-mov esp, 0x1FFFF0				; Stack at 2MiB
+mov esp, 0xFFFFFFF0
 
-jmp 0x100000					; Jump to the newly loaded kernel
+jmp 0xC0000000					; Jump to the newly loaded kernel
 
 times 4096-($-$$)			db 0x00				; Padding

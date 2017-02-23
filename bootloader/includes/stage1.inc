@@ -62,6 +62,8 @@ DoneMsg			db '  DONE', 0x0D, 0x0A, 0x00
 %include 'bootloader/includes/simple_print.inc'
 %include 'bootloader/includes/disk.inc'
 
-times 509-($-$$)			db 0x00				; Fill rest with 0x00
+times 501-($-$$)			db 0x00				; Fill rest with 0x00
+low_extended_mem			dd 0x00000000		; Low extended memory at 0x7DF5
+high_extended_mem			dd 0x00000000		; High extended memory at 0x7DF9
 drive_number				db 0x00				; Drive number saved at 0x7DFD
 bios_signature				dw 0xAA55			; BIOS signature

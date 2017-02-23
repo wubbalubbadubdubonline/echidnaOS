@@ -54,28 +54,39 @@ call simple_print				; Display done message
 mov si, MemoryMsg
 call simple_print
 
-mov edi, 0x5000					; The memory map is available at 0x00005000
-xor ebx, ebx					; Clear EBX
-mov edx, 0x534D4150				; Magic number
-
 detect_memory:
 
-mov eax, 0xE820					; BIOS function
-mov ecx, 24
+	xor eax, eax
+	xor ebx, ebx
+	xor cx, cx
+	xor dx, dx
 
-clc								; Clear carry
+	mov ax, 0xE801					; BIOS function
 
-int 0x15						; Detect memory
+	clc								; Clear carry
 
-jc .done
+	int 0x15						; Detect memory
 
-test ebx, ebx					; Check for last entry
-jz .done
+	jc err							; Catch errors
+	cmp ah, 0x86
+	je err
+	cmp ah, 0x80
+	je err
 
-add edi, 24						; Increment EDI
+	test cx, cx						; Is CX null?
+	jz .use_ax_bx
 
-jmp detect_memory
-.done:
+	mov ax, cx
+	mov bx, dx
+
+	.use_ax_bx:
+	mov ecx, 0x400						; Get memory in bytes, and save it
+	mul ecx
+	mov dword [low_extended_mem], eax
+	mov eax, ebx
+	mov ecx, 0x10000
+	mul ecx
+	mov dword [high_extended_mem], eax
 
 mov si, DoneMsg
 call simple_print				; Display done message

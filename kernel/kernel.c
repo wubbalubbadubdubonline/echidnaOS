@@ -12,9 +12,14 @@
 
 void _start(void) {
 
+	char buf[16] = {0};
+
 	text_clear();
 
 	text_putstring("echidnaOS\n\n");
+
+	text_putstring(itoa(mem_load_d(0x7DF5)+mem_load_d(0x7DF9), buf, 10));
+	text_putstring(" bytes of usable extended memory detected.\n\n");
 
 	text_putstring("Initialising PIC...");
 
@@ -36,7 +41,6 @@ void _start(void) {
 
         partition_table table; table = enumerate_partitions(devices[0]);
         
-        char buf[9] = {0};
         if (table.partitions[0].exists != 0)
             text_putstring(itoa(table.partitions[0].type, buf, 16));
         if (table.partitions[1].exists != 0)

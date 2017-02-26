@@ -1,4 +1,4 @@
-C_FILES = $(wildcard kernel/*.c wildcard kernel/libs/*.c wildcard kernel/drivers/*.c)
+C_FILES = $(wildcard kernel/*.c wildcard kernel/libs/*.c wildcard kernel/drivers/*.c wildcard kernel/libs/fs/*.c)
 ASM_FILES = $(wildcard kernel/drivers/*.asm)
 C_OBJ = ${C_FILES:.c=.o}
 ASM_OBJ = ${ASM_FILES:.asm=.o}

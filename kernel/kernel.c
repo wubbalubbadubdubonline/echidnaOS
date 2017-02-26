@@ -9,6 +9,7 @@
 #include "drivers/pic.h"
 #include "drivers/gdt.h"
 #include "drivers/idt.h"
+#include "libs/fs/fat32.h"
 
 void _start(void) {
 
@@ -57,6 +58,18 @@ void _start(void) {
             text_putstring(itoa(table.partitions[6].type, buf, 16));
         if (table.partitions[7].exists != 0)
             text_putstring(itoa(table.partitions[7].type, buf, 16));
+        
+        text_putstring("\n");
+        
+        fat32_filesystem fs = get_fs(table.partitions[0], devices[0]);
+        
+        text_putstring("OEM name: ");
+        text_putstring(fs.oem_name);
+        text_putstring("\n");
+        
+        text_putstring("Volume label: ");
+        text_putstring(fs.volume_name);
+        text_putstring("\n");
         
 	text_putstring("\nSoft halting system.");
 	system_soft_halt();

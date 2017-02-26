@@ -117,47 +117,24 @@ partition_table enumerate_partitions(ata_device dev) {
         
         if (part.exists != 0) {
             
-            text_putstring("Partition type: ");
-            itoa(part.type, buf, 16);
-            text_putstring(buf);
-            text_putstring(" (");
+            text_putstring("- ");
             text_putstring(names[part.type]);
-            text_putstring(")\n");
-
-            text_putstring("First sector: ");
-            itoa(part.start_lba, buf, 16);
-            text_putstring(buf);
-            text_putchar('\n');
-
-            text_putstring("Sector count: ");
-            itoa(part.sector_count, buf, 16);
-            text_putstring(buf);
-            text_putchar('\n');
+            text_putstring(" - ");
+            text_putstring(itoa((part.sector_count), buf, 16));
+            text_putstring(" sectors\n");
         
             if (part.type == 0xf) {
-                text_putstring("Enumerating partitions from extended partition:\n");
                 extended_partition ext_part = get_extended_partition(part, dev);
                 uint8_t id_;
                 for (id_ = 0; id_ < 2; id_++) {
                     partition part_ = ext_part.partitions[id_];
                     
                     if (part_.exists != 0) {
-                        text_putstring("Partition type: ");
-                        itoa(part_.type, buf, 16);
-                        text_putstring(buf);
-                        text_putstring(" (");
+                        text_putstring("    - ");
                         text_putstring(names[part_.type]);
-                        text_putstring(")\n");
-            
-                        text_putstring("First sector: ");
-                        itoa(part_.start_lba, buf, 16);
-                        text_putstring(buf);
-                        text_putchar('\n');
-
-                        text_putstring("Sector count: ");
-                        itoa(part_.sector_count, buf, 16);
-                        text_putstring(buf);
-                        text_putchar('\n');
+                        text_putstring(" - ");
+                        text_putstring(itoa((part_.sector_count), buf, 16));
+                        text_putstring(" sectors\n");
                         
                         // ------------------------
                         table.partitions[table_id].status = part_.status;

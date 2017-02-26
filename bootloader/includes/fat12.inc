@@ -11,13 +11,13 @@ load_file:
 
 ; OUT:
 ; Carry if file not found, (does not clear the carry flag if found)
+; ecx		-->		File size
 
 ; NOTES:
 ; This routine assumes 1000:0000 --> 1000:FFFF to be a usable buffer
 
 push eax						; Save registers to prepare entering routine
 push ebx
-push ecx
 push edx
 push esi
 push fs
@@ -126,6 +126,10 @@ mov bx, ax
 mov ax, word [es:bx]
 mov word [.Cluster], ax			; Save starting cluster
 
+add bx, 2
+mov eax, dword [es:bx]
+mov dword [.FileSize], eax
+
 ; Let's load the FAT in the buffer now
 
 ; FAT start = Reserved Sectors
@@ -202,11 +206,12 @@ stc						; Set carry
 pop fs					; Restore registers
 pop esi
 pop edx
-pop ecx
 pop ebx
 pop eax
+mov ecx, dword [.FileSize]
 ret
 
+.FileSize dd 0x00000000
 .ReservedSectors dw 0x0000
 .SectorsPerFAT dw 0x0000
 .RootEntries dw 0x0000

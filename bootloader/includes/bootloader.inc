@@ -33,22 +33,6 @@ lgdt [GDT]						; Load the GDT
 mov si, DoneMsg
 call simple_print				; Display done message
 
-; ***** Kernel *****
-
-mov si, KernelMsg				; Show loading kernel message
-call simple_print
-
-; Load the kernel to 0x1000000
-
-mov si, kernel_name
-mov ebx, 0x1000000				; Load to offset 0x1000000
-call load_file
-
-jc err							; Catch any error
-
-mov si, DoneMsg
-call simple_print				; Display done message
-
 ; *** Detect memory ***
 
 mov si, MemoryMsg
@@ -80,13 +64,35 @@ detect_memory:
 	mov bx, dx
 
 	.use_ax_bx:
-	mov ecx, 0x400						; Get memory in bytes, and save it
-	mul ecx
-	mov dword [low_extended_mem], eax
-	mov eax, ebx
-	mov ecx, 0x10000
-	mul ecx
-	mov dword [high_extended_mem], eax
+	test bx, bx							; If mem > 16M == 0, there is not enough memory. Abort.
+	jz err
+	mov eax, 0x10000					; Get memory in bytes, and save it
+	mul ebx
+	mov dword [memory_size], eax
+	add dword [memory_size], 0x1000000	; Add lower memory size
+
+mov si, DoneMsg
+call simple_print				; Display done message
+
+; ***** Kernel *****
+
+; Load the kernel to 0x1000000
+
+mov si, KernelMsg				; Show loading kernel message
+call simple_print
+
+mov si, kernel_name
+mov ebx, 0x1000000				; Load to offset 0x1000000
+call load_file
+
+jc err							; Catch any error
+
+mov eax, dword [memory_size]	; Check if there is enough memory to run the kernel
+sub eax, 0x1000000
+cmp ecx, eax
+jg err
+
+mov dword [kernel_size], ecx
 
 mov si, DoneMsg
 call simple_print				; Display done message

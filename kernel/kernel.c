@@ -19,8 +19,12 @@ void _start(void) {
 
 	text_putstring("echidnaOS\n\n");
 
-	text_putstring(itoa(mem_load_d(0x7DF5)+mem_load_d(0x7DF9), buf, 10));
-	text_putstring(" bytes of usable extended memory detected.\n\n");
+	text_putstring(itoa(mem_load_d(0x7DF9), buf, 10));
+	text_putstring(" bytes of memory detected.\n");
+
+	text_putstring("The kernel is ");
+	text_putstring(itoa(mem_load_d(0x7DF5), buf, 10));
+	text_putstring(" bytes long.\n\n");
 
 	text_putstring("Initialising PIC...");
 

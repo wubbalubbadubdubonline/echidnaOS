@@ -10,9 +10,10 @@ xor eax, eax
 mov ecx, 0x400
 a32 o32 rep stosd
 
-a32 o32 mov dword [0x100000], 0x83		; Point the PDT to the PT for the first MiB
-a32 o32 mov dword [0x100C00], 0x800083	; (kernel)
-a32 o32 mov dword [0x100FFC], 0x400083	; (kernel stack)
+a32 o32 mov dword [0x100000], 0x83		; (first 4 MiBs)
+a32 o32 mov dword [0x100C00], 0x1000083	; (kernel)
+a32 o32 mov dword [0x100FFC], 0x800083	; (kernel stack)
+a32 o32 mov dword [0x100FF8], 0x400083	; (more kernel stack)
 
 cli						; Disable interrupts
 

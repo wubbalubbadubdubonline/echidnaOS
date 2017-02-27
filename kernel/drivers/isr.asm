@@ -37,6 +37,12 @@ handler_irq_pic1:
 
 keyboard_isr:
 	push eax
+	push ebx
+	push ecx
+	push edx
+	push esi
+	push edi
+	push ebp
 	xor eax, eax
 	in al, 0x60		; read from keyboard
 	push eax
@@ -44,6 +50,12 @@ keyboard_isr:
 	add esp, 4
 	mov al, 0x20	; acknowledge interrupt to PIC0
 	out 0x20, al
+	pop ebp
+	pop edi
+	pop esi
+	pop edx
+	pop ecx
+	pop ebx
 	pop eax
 	iret
 

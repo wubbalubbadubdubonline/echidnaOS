@@ -3,6 +3,7 @@ global handler_code
 global handler_irq_pic0
 global handler_irq_pic1
 global keyboard_isr
+global syscall
 
 section .data
 
@@ -39,4 +40,8 @@ keyboard_isr:
 	mov al, 0x20	; acknowledge interrupt to PIC0
 	out 0x20, al
 	pop eax
+	iret
+
+syscall:
+	xchg bx, bx
 	iret

@@ -74,6 +74,8 @@ void _start(void) {
         text_putstring("Volume label: ");
         text_putstring(fs.volume_name);
         text_putstring("\n");
+
+	asm("int 0x80");
         
 	text_putstring("\nSoft halting system.");
 	system_soft_halt();

@@ -47,25 +47,6 @@ void _start(void) {
 
         partition_table table; table = enumerate_partitions(devices[0]);
         
-        if (table.partitions[0].exists != 0)
-            text_putstring(itoa(table.partitions[0].type, buf, 16));
-        if (table.partitions[1].exists != 0)
-            text_putstring(itoa(table.partitions[1].type, buf, 16));
-        if (table.partitions[2].exists != 0)
-            text_putstring(itoa(table.partitions[2].type, buf, 16));
-        if (table.partitions[3].exists != 0)
-            text_putstring(itoa(table.partitions[3].type, buf, 16));
-        if (table.partitions[4].exists != 0)
-            text_putstring(itoa(table.partitions[4].type, buf, 16));
-        if (table.partitions[5].exists != 0)
-            text_putstring(itoa(table.partitions[5].type, buf, 16));
-        if (table.partitions[6].exists != 0)
-            text_putstring(itoa(table.partitions[6].type, buf, 16));
-        if (table.partitions[7].exists != 0)
-            text_putstring(itoa(table.partitions[7].type, buf, 16));
-        
-        text_putstring("\n");
-        
         fat32_filesystem fs = get_fs(table.partitions[0], devices[0]);
         
         text_putstring("OEM name: ");
@@ -77,6 +58,10 @@ void _start(void) {
         text_putstring("\n");
 
 	asm("int 0x80");
+                
+        while (1) {
+            text_putstring(get_keyboard_buffer());
+        }
         
 	text_putstring("\nSoft halting system.");
 	system_soft_halt();

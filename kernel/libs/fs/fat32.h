@@ -3,18 +3,25 @@
 
 #include "../stdint.h"
 #include "../stddef.h"
+#include "../string.h"
 #include "../partition.h"
 #include "../../drivers/textdrv.h"
 #include "../../drivers/system.h" 
 
-
-typedef struct fs_information_sector {
+typedef struct fat32_fs_information_sector {
     uint32_t first_signature;
     uint32_t signature_fs_info;
     uint32_t free_clusters; // -1 if unknown (0xFFFFFFFF)
     uint32_t most_recent_cluster;
     
-} fs_information_sector;
+} fat32_fs_information_sector;
+
+typedef struct fat32_fs_data {
+    uint32_t current_dir_cluster;
+    uint32_t fat_sector;
+    uint32_t root_dir_sector;
+    uint32_t cluster_begin_sector;
+} fat32_fs_data;
 
 
 typedef struct fat32_filesystem {
@@ -41,7 +48,8 @@ typedef struct fat32_filesystem {
     uint32_t serial_number;
     uint8_t volume_name[12];
     uint8_t fat_name[9];
-    fs_information_sector info_sector;
+    fat32_fs_information_sector info;
+    fat32_fs_data data;
 } fat32_filesystem;
 
 void print_fat_oem(partition partition, ata_device dev);

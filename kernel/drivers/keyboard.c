@@ -18,11 +18,9 @@ const char sc_ascii[] = { '?', '?', '1', '2', '3', '4', '5', '6',
         'B', 'N', 'M', ',', '.', '/', '?', '?', '?', ' '};
 
 void keyboard_handler(uint8_t input_byte) {
-	asm("xchg bx, bx");
-	// something
-        if (input_byte == SC_CAPSLOCK) {
+        if (input_byte == SC_CAPSLOCK || input_byte == SC_LEFT_SHIFT || input_byte == SC_RIGHT_SHIFT || input_byte == SC_LEFT_SHIFT_REL || input_byte == SC_RIGHT_SHIFT_REL) {
                 capslock_active = !capslock_active;
-        } else if (input_byte < SC_MAX) {
+		} else if (input_byte < SC_MAX) {
             if (input_byte == SC_ENTER) {
                 if (buffer_index < 256) {
                     keyboard_buffer[buffer_index] = '\n';

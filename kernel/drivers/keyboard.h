@@ -9,6 +9,10 @@
 #define SC_CAPSLOCK 0x3A
 #define SC_ENTER 0x1C
 #define SC_BACKSPACE 0x0E
+#define SC_RIGHT_SHIFT 0x36
+#define SC_LEFT_SHIFT 0x2A
+#define SC_RIGHT_SHIFT_REL 0xB6
+#define SC_LEFT_SHIFT_REL 0xAA
 
 void keyboard_handler(uint8_t input_byte);
 

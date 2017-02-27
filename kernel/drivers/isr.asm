@@ -5,6 +5,8 @@ global handler_irq_pic1
 global keyboard_isr
 global syscall
 
+extern keyboard_handler
+
 section .data
 
 section .text
@@ -34,9 +36,12 @@ handler_irq_pic1:
 	iret
 
 keyboard_isr:
-	xchg bx, bx
 	push eax
+	xor eax, eax
 	in al, 0x60		; read from keyboard
+	push eax
+	call keyboard_handler
+	add esp, 4
 	mov al, 0x20	; acknowledge interrupt to PIC0
 	out 0x20, al
 	pop eax

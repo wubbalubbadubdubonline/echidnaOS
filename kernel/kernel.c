@@ -9,6 +9,7 @@
 #include "drivers/pic.h"
 #include "drivers/gdt.h"
 #include "drivers/idt.h"
+#include "drivers/keyboard.h"
 #include "libs/fs/fat32.h"
 
 void _start(void) {

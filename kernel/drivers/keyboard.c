@@ -3,7 +3,7 @@
 static uint8_t capslock_active = 0;
 static char keyboard_buffer[256];
 static uint16_t buffer_index;
-
+static char last_char;
 
 const char *sc_name[] = { "ERROR", "Esc", "1", "2", "3", "4", "5", "6", 
     "7", "8", "9", "0", "-", "=", "Backspace", "Tab", "Q", "W", "E", 
@@ -27,12 +27,18 @@ void keyboard_handler(uint8_t input_byte) {
                 if (buffer_index < 256) {
                     keyboard_buffer[buffer_index] = '\n';
                     buffer_index++;
+                    last_char = '\n';
                 }
+                
             } else if (input_byte == SC_BACKSPACE) {
                 if (buffer_index < 256) {
-                    keyboard_buffer[buffer_index] = '\0';
-                    buffer_index--;
+                    if (buffer_index > 0) {
+                        keyboard_buffer[buffer_index] = '\0';
+                        buffer_index--;
+                        last_char = '\b';
+                    }
                 }
+                
             } else {
                 char c = sc_ascii[input_byte];
                 if (capslock_active == 0) {
@@ -42,6 +48,7 @@ void keyboard_handler(uint8_t input_byte) {
                 if (buffer_index < 256) {
                     keyboard_buffer[buffer_index] = c;
                     buffer_index++;
+                    last_char = c;
                 }
             }
         }
@@ -53,4 +60,14 @@ char* get_keyboard_buffer() {
 
 void clear_keyboard_buffer() {
     memset(keyboard_buffer, 0, 256);
+    buffer_index = 0;
+}
+
+char get_last_char() {
+    return last_char;
+}
+
+void clear_last_char() {
+    last_char = 0;
+    
 }

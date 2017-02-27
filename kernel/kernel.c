@@ -58,9 +58,23 @@ void _start(void) {
         text_putstring("\n");
 
 	asm("int 0x80");
-                
+            
+        char last_c;
+        
         while (1) {
-            text_putstring(get_keyboard_buffer());
+            char c = get_last_char();
+            
+            if (c != last_c) {
+                text_putchar(c);
+                last_c = c;
+                clear_last_char();
+                
+                // interactive "shell"
+                if (c == '\n') {
+                    if (strncmp("clear", get_keyboard_buffer(), 5) == 0) text_clear();
+                    clear_keyboard_buffer();
+                }
+            }
         }
         
 	text_putstring("\nSoft halting system.");

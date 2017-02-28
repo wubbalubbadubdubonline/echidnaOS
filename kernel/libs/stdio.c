@@ -8,7 +8,7 @@
 
 char *_itoa(int, char *, int, int);
 char *_ltoa(long, char *, int, int);
-char *_lltoa(long long, char *, int, int);
+//char *_lltoa(long long, char *, int, int);
 
 int puts(const char *str)
 {
@@ -158,7 +158,7 @@ int printf(const char *format, ...)
                         continue;
                 }
             }
-            else if ( strncmp(format, "ll", 2) == 0 )
+/*            else if ( strncmp(format, "ll", 2) == 0 )
             {
                 int i = 0;
 
@@ -181,7 +181,7 @@ int printf(const char *format, ...)
                         format += 3;
                         continue;
                 }
-            }
+            }*/
             else if ( *format == 'l' )
             {
                 int i = 0;
@@ -240,14 +240,14 @@ int printf(const char *format, ...)
                         break;
 
                     case MOD_LONG:
-                        n = va_arg(args, unsigned char);
+                        n = va_arg(args, unsigned long);
                         break;
 
-                    case MOD_LONG_LONG:
-                        n = va_arg(args, unsigned char);
+//                    case MOD_LONG_LONG:
+//                        n = va_arg(args, unsigned long long);
                 }
 
-                _len = strlen(lltoa(n, buf, 10));
+                _len = strlen(ltoa(n, buf, 10));
 
                 if ( sign && buf[0] != '-' ) width--, count++;
 
@@ -299,11 +299,11 @@ int printf(const char *format, ...)
                         n = va_arg(args, unsigned long);
                         break;
 
-                    case MOD_LONG_LONG:
-                        n = va_arg(args, unsigned long long);
+//                    case MOD_LONG_LONG:
+//                        n = va_arg(args, unsigned long long);
                 }
 
-                _len = strlen(lltoa(n, buf, 16));
+                _len = strlen(ltoa(n, buf, 16));
 
                 count += _len + (width > 0 ? width : 0);
 
@@ -345,11 +345,11 @@ int printf(const char *format, ...)
                         n = va_arg(args, unsigned long);
                         break;
 
-                    case MOD_LONG_LONG:
-                        n = va_arg(args, unsigned long long);
+//                    case MOD_LONG_LONG:
+//                        n = va_arg(args, unsigned long long);
                 }
 
-                _len = strlen(lltoa(n, buf, 16));
+                _len = strlen(ltoa(n, buf, 16));
 
                 count += _len + (width > 0 ? width : 0);
 
@@ -389,11 +389,11 @@ int printf(const char *format, ...)
                         n = va_arg(args, unsigned long);
                         break;
 
-                    case MOD_LONG_LONG:
-                        n = va_arg(args, unsigned long long);
+//                    case MOD_LONG_LONG:
+//                        n = va_arg(args, unsigned long long);
                 }
 
-                int _len = strlen(_lltoa(n, buf, 10, 0));
+                int _len = strlen(_ltoa(n, buf, 10, 0));
                 count += _len;
                 if ( pad )
                 {

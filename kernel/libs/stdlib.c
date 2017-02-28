@@ -201,7 +201,7 @@ char *_ltoa(long n, char *buf, int base, int sign)
 
 	return buf;
 }
-
+/*
 char *_lltoa(long long n, char *buf, int base, int sign)
 {
 	if ( n == 0 )
@@ -211,13 +211,13 @@ char *_lltoa(long long n, char *buf, int base, int sign)
 		return buf;
 	}
 
-	/* large enough to hold binary ~0 plus the null byte */
+	// large enough to hold binary ~0 plus the null byte
 	char tmp[(sizeof(long long)*8)+1];
 	unsigned long long m;
 
 	char *cp = tmp;
 
-	/* if using base 10, enable negative numbers */
+	// if using base 10, enable negative numbers
 	if ( base == 10 && sign && n < 0 )
 	{
 		*cp++ = '-';
@@ -226,7 +226,7 @@ char *_lltoa(long long n, char *buf, int base, int sign)
 
 	m = n;
 
-	/* create number in reverse for convenience */
+	// create number in reverse for convenience
 	while ( m )
 	{
 		*cp++ = base_digits[m % base];
@@ -235,7 +235,7 @@ char *_lltoa(long long n, char *buf, int base, int sign)
 
 	*cp = '\0';
 
-	/* now it's time to copy the sting to buf in proper order */
+	// now it's time to copy the sting to buf in proper order
 	cp = buf;
 
 	if ( base == 10 && *tmp == '-' )
@@ -246,7 +246,7 @@ char *_lltoa(long long n, char *buf, int base, int sign)
 	for ( int i = len-1; i >= 0; i-- )
 		*cp++ = tmp[i];
 
-	/* if the number is negative, then we copied the sign twice */
+	// if the number is negative, then we copied the sign twice
 	if ( *tmp == '-' )
 		cp--;
 
@@ -254,7 +254,7 @@ char *_lltoa(long long n, char *buf, int base, int sign)
 
 	return buf;
 }
-
+*/
 char *itoa(int n, char *buf, int base)
 {
 	return _itoa(n, buf, base, 1);
@@ -264,10 +264,10 @@ char *ltoa(long n, char *buf, int base)
 {
 	return _ltoa(n, buf, base, 1);
 }
-char *lltoa(long long n, char *buf, int base)
+/*char *lltoa(long long n, char *buf, int base)
 {
 	return _lltoa(n, buf, base, 1);
-}
+}*/
 
 #define BIG_ENDIAN 1
 #define LITTLE_ENDIAN 2
@@ -337,7 +337,7 @@ char *ftoa(float n, char *res)
 	float fpart = n - (float)ipart;
 
 	// convert integer part to string
-	int digits = strlen(lltoa(ipart, res, 10));
+	int digits = strlen(ltoa(ipart, res, 10));
 
 	res[digits++] = '.';  // add dot
 
@@ -346,7 +346,7 @@ char *ftoa(float n, char *res)
 	// to handle cases like 233.007.
 	fpart = fpart * pow(10, 8);
 
-	lltoa((int64_t)fpart, res + digits, 10);
+	ltoa((int64_t)fpart, res + digits, 10);
 
 	return res;
 }
@@ -360,7 +360,7 @@ char *dtoa(double n, char *res)
 	double fpart = n - (double)ipart;
 
 	// convert integer part to string
-	int digits = strlen(lltoa(ipart, res, 10));
+	int digits = strlen(ltoa(ipart, res, 10));
 
 	res[digits++] = '.';  // add dot
 
@@ -369,7 +369,7 @@ char *dtoa(double n, char *res)
 	// to handle cases like 233.007.
 	fpart = fpart * pow(10, 16);
 
-	lltoa((int64_t)fpart, res + digits, 10);
+	ltoa((int64_t)fpart, res + digits, 10);
 
 	return res;
 }

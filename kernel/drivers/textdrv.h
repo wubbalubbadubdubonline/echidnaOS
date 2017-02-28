@@ -14,7 +14,7 @@ char text_get_text_palette(void);
 void text_clear(void);
 void text_disable_cursor(void);
 void text_enable_cursor(void);
-void text_putstring(char *string);
+void text_putstring(const char *string);
 
 
 

@@ -97,7 +97,7 @@ void text_putchar(char c) {
 	}
 }
 
-void text_putstring(char *string) {
+void text_putstring(const char *string) {
 	int x;
 	for (x=0; string[x]!=0; x++) {
 		text_putchar(string[x]);

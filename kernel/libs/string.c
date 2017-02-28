@@ -140,6 +140,19 @@ char *strstr(char *str1, const char *str2)
   }
 }
 
+char *strpbrk(char *str, const char *targets)
+{
+  for ( ; *str; str++ )
+  {
+    for ( char * sp = targets; *sp; sp++ )
+    {
+      if ( *str == *sp ) return sp;
+    }
+  }
+
+  return NULL;
+}
+
 void *memset(void *arr, int val, size_t len)
 {
   for (size_t i = 0; i < len; i++ )

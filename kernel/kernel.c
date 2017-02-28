@@ -7,6 +7,7 @@
 #include "libs/math.h"
 #include "libs/partition.h"
 #include "libs/ctype.h"
+#include "libs/panic.h"
 #include "drivers/system.h"
 #include "drivers/textdrv.h"
 #include "drivers/ata.h"
@@ -55,7 +56,7 @@ void _start(void) {
         text_putstring(fs.volume_name);
         text_putstring("\n");
 
-	asm volatile ("xchg bx,bx; push 'c'; mov eax, 0; int 0x80");
+	panic("OwO");
             
         char last_c;
         

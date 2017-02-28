@@ -15,6 +15,7 @@ cpu_state_esp			dd	0xffbffff0
 interrupted_esp			dd	0
 
 routine_list:
+	times 0x20	dd	0
 	dd	text_putchar
 	dd	text_putstring
 

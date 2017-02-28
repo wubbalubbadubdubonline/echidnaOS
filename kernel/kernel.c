@@ -55,8 +55,6 @@ void _start(void) {
         text_putstring("Volume label: ");
         text_putstring(fs.volume_name);
         text_putstring("\n");
-
-	panic("OwO");
             
         char last_c;
         
@@ -71,6 +69,7 @@ void _start(void) {
                 // interactive "shell"
                 if (c == '\n') {
                     if (strncmp("clear", get_keyboard_buffer(), 5) == 0) text_clear();
+                    if (strncmp("panic", get_keyboard_buffer(), 5) == 0) panic("manually triggered panic");
                     clear_keyboard_buffer();
                 }
             }

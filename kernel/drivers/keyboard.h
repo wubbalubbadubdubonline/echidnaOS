@@ -18,5 +18,7 @@ void keyboard_handler(uint8_t input_byte);
 
 char* get_keyboard_buffer();
 void clear_keyboard_buffer();
+char get_last_char();
+void clear_last_char();
 
 #endif

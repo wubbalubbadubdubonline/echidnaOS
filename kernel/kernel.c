@@ -2,7 +2,11 @@
 #include "libs/stdint.h"
 #include "libs/string.h"
 #include "libs/stdlib.h"
+#include "libs/stdarg.h"
+#include "libs/stdio.h"
+#include "libs/math.h"
 #include "libs/partition.h"
+#include "libs/ctype.h"
 #include "drivers/system.h"
 #include "drivers/textdrv.h"
 #include "drivers/ata.h"
@@ -14,26 +18,20 @@
 
 void _start(void) {
 
-	char buf[16] = {0};
-
 	text_clear();
 
-	text_putstring("echidnaOS\n\n");
+	printf("echidnaOS\n\n");
 
-	text_putstring(itoa(mem_load_d(0x7DF9), buf, 10));
-	text_putstring(" bytes of memory detected.\n");
+	printf("%d bytes of memory detected.\n", mem_load_d(0x7DF9));
+	printf("The kernel is %d bytes long.\n\n", mem_load_d(0x7DF5));
 
-	text_putstring("The kernel is ");
-	text_putstring(itoa(mem_load_d(0x7DF5), buf, 10));
-	text_putstring(" bytes long.\n\n");
-
-	text_putstring("Initialising PIC...");
+	printf("Initialising PIC...");
 
 	map_PIC(0x20, 0x28);	// map the PIC0 at int 0x20-0x27 and PIC1 at 0x28-0x2F
 
-	text_putstring(" Done.\n");
+	printf(" Done.\n");
 
-	text_putstring("Building descriptor tables...");
+	printf("Building descriptor tables...");
 
 	create_GDT();		// build the GDT
 	create_IDT();		// build the IDT
@@ -41,7 +39,7 @@ void _start(void) {
 	load_segments();	// activate the GDT
 	enable_ints();		// activate the IDT
 
-	text_putstring(" Done.\n");
+	printf(" Done.\n");
 
 	ata_device* devices = get_ata_devices();
 
@@ -77,7 +75,7 @@ void _start(void) {
             }
         }
         
-	text_putstring("\nSoft halting system.");
+	printf("\nSoft halting system.");
 	system_soft_halt();
 
 }

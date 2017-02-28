@@ -55,7 +55,7 @@ void _start(void) {
         text_putstring(fs.volume_name);
         text_putstring("\n");
 
-	asm("int 0x80");
+	asm volatile ("xchg bx,bx; push 'c'; mov eax, 0; int 0x80");
             
         char last_c;
         

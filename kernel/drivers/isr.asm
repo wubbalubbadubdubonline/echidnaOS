@@ -6,8 +6,17 @@ global keyboard_isr
 global syscall
 
 extern keyboard_handler
+extern text_putchar
+extern text_putstring
 
 section .data
+
+cpu_state_esp			dd	0xffbffff0
+interrupted_esp			dd	0
+
+routine_list:
+	dd	text_putchar
+	dd	text_putstring
 
 section .text
 
@@ -60,5 +69,49 @@ keyboard_isr:
 	iret
 
 syscall:
-	xchg bx, bx
+	mov dword [interrupted_esp], esp
+	mov esp, dword [cpu_state_esp]
+	push ebx
+	push ecx
+	push edx
+	push esi
+	push edi
+	push ebp
+	mov dword [cpu_state_esp], esp
+	mov esp, dword [interrupted_esp]
+	pop ebx		; EIP
+	pop ecx		; CS
+	pop edx		; FLAGS
+	mov dword [interrupted_esp], esp
+	mov esp, dword [cpu_state_esp]
+	push edx
+	push ecx
+	push ebx
+	mov dword [cpu_state_esp], esp
+	mov esp, dword [interrupted_esp]
+	mov ebx, 4
+	mul ebx
+	sti				; Interrupts enabled
+	call [routine_list+eax]
+	cli				; Interrupts disabled
+	mov dword [interrupted_esp], esp
+	mov esp, dword [cpu_state_esp]
+	pop ebx
+	pop ecx
+	pop edx
+	mov dword [cpu_state_esp], esp
+	mov esp, dword [interrupted_esp]
+	push edx
+	push ecx
+	push ebx
+	mov dword [interrupted_esp], esp
+	mov esp, dword [cpu_state_esp]
+	pop ebp
+	pop edi
+	pop esi
+	pop edx
+	pop ecx
+	pop ebx
+	mov dword [cpu_state_esp], esp
+	mov esp, dword [interrupted_esp]
 	iret

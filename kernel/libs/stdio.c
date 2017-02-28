@@ -216,9 +216,39 @@ int printf(const char *format, ...)
             {
                 char *s = va_arg(args, char *);
                 int length = strlen(s);
-                length = length < width ? length : width;
-                count += length;
-                while ( *s ) text_putchar(*s++);
+
+                if ( width > 0 )
+                {
+                    count += width;
+                    if ( !(pad & PAD_RIGHT) )
+                    {
+                        if ( length > width )
+                        {
+                            for ( int i = 0; i < width; i++ )
+                                text_putchar(s[i]);
+                        }
+                        else
+                        {
+                            for ( int i = width - length; i; i-- )
+                                text_putchar(' ');
+
+                            text_putstring(s);
+                        }
+                    }
+                    else
+                    {
+                        for ( ; width--;  )
+                        {
+                            *s ? text_putchar(*s++) : text_putchar(' ');
+                        }
+                    }
+                }
+                else
+                {
+                    text_putstring(s);
+                    count += length;
+                }
+
                 continue;
             }
             //done?
@@ -252,6 +282,7 @@ int printf(const char *format, ...)
                 }
 
                 _len = strlen(ltoa(n, buf, 10));
+                width -= _len;
 
                 if ( sign && buf[0] != '-' ) width--, count++;
 
@@ -269,7 +300,7 @@ int printf(const char *format, ...)
                         text_putchar('+');
                 }
 
-                for ( int i = 0; buf[i]; i++ ) text_putchar(buf[i]);
+                text_putstring(buf);
 
                 if ( pad & PAD_RIGHT )
                     for ( ; width > 0; width-- )
@@ -308,6 +339,7 @@ int printf(const char *format, ...)
                 }
 
                 _len = strlen(ltoa(n, buf, 16));
+                width -= _len;
 
                 count += _len + (width > 0 ? width : 0);
 
@@ -315,7 +347,7 @@ int printf(const char *format, ...)
                     for ( ; width > 0; width-- ) 
                         text_putchar(padchar), count++;
 
-                for ( int i = 0; buf[i]; i++ ) text_putchar(buf[i]);
+                text_putstring(buf);
 
                 if ( pad & PAD_RIGHT )
                     for ( ; width > 0; width-- )
@@ -354,6 +386,7 @@ int printf(const char *format, ...)
                 }
 
                 _len = strlen(ltoa(n, buf, 16));
+                width -= _len;
 
                 count += _len + (width > 0 ? width : 0);
 
@@ -363,7 +396,7 @@ int printf(const char *format, ...)
 
                 for ( int i = 0; buf[i] = toupper(buf[i]); i++ );
 
-                for ( int i = 0; buf[i]; i++ ) text_putchar(buf[i]);
+                text_putstring(buf);
 
                 if ( pad & PAD_RIGHT )
                     for ( ; width > 0; width-- )
@@ -373,7 +406,7 @@ int printf(const char *format, ...)
             //todo
             if( *format == 'u' )
             {
-                char buf[21];
+                char buf[21], padchar;
                 uint64_t n;
                 switch ( mod )
                 {
@@ -398,13 +431,26 @@ int printf(const char *format, ...)
                 }
 
                 int _len = strlen(_ltoa(n, buf, 10, 0));
+
                 count += _len;
                 if ( pad )
                 {
                     width -= _len;
+                    count += width > 0 ? width : 0;
+                    padchar = pad & PAD_ZERO ? '0' : ' ';
 
-                    //                    
+                    if ( !(pad & PAD_RIGHT) )
+                    {
+                        for ( ; width > 0; width-- )
+                            text_putchar(padchar);
+                    }
                 }
+
+                text_putstring(buf);
+
+                if ( pad & PAD_RIGHT )
+                    for ( ; width > 0; width-- )
+                        text_putchar(' ');
 
                 continue;
             }

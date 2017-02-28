@@ -78,8 +78,9 @@ int printf(const char *format, ...)
                 pad |= PAD_ZERO;
             }
 
-            if ( *format++ == '*' )
+            if ( *format == '*' )
             {
+                format++;
                 width = va_arg(args, int);
                 width = width > 0 ? width : 0;
             }
@@ -92,11 +93,14 @@ int printf(const char *format, ...)
                 }
             }
 
-            if ( *format++ == '.' )
+            if ( *format == '.' )
             {
+                format++;
+
                 if( *format == '*' )
                 {
                     fp_width = va_arg(args, int);
+                    format++;
                 }
                 else if ( isdigit(*format) )
                 {

@@ -7,6 +7,7 @@
 #include "../partition.h"
 #include "../../drivers/textdrv.h"
 #include "../../drivers/system.h" 
+#include "../../drivers/device_abstraction.h" 
 
 typedef struct fat32_fs_information_sector {
     uint32_t first_signature;
@@ -52,7 +53,7 @@ typedef struct fat32_filesystem {
     fat32_fs_data data;
 } fat32_filesystem;
 
-void print_fat_oem(partition partition, ata_device dev);
-fat32_filesystem get_fs(partition partition, ata_device dev);
+void print_fat_oem(partition partition, uint8_t dev);
+fat32_filesystem get_fs(partition partition, uint8_t dev);
 
 #endif

@@ -4,8 +4,12 @@ uint32_t cluster_to_lba(fat32_filesystem fs, uint32_t cluster){
 	return fs.data.cluster_begin_sector+(fs.sectors_per_cluster * (cluster-2));
 }
 
-void print_fat_oem(partition partition, ata_device dev) {
-    uint8_t* sector = ata_read28(dev, partition.start_lba);
+void print_fat_oem(partition partition, uint8_t dev) {
+    if (abstraction_device_exists(dev) == 0)        return;
+    if (partition.type != 0xC)                      return;
+    
+    uint8_t* sector = abstraction_read_sector(dev, partition.start_lba);
+    
     uint8_t loop;
     for(loop = 0; loop < 8; loop++) {
         text_putchar(mem_load_b(sector+0x3+loop));
@@ -13,13 +17,13 @@ void print_fat_oem(partition partition, ata_device dev) {
     }
 }
 
-fat32_filesystem get_fs(partition partition, ata_device dev) {
+fat32_filesystem get_fs(partition partition, uint8_t dev) {
     fat32_filesystem fs;
     
-//     if (dev.exists == 0) return fs;
-//     if (partition.type != 0xC) return fs;
+    if (abstraction_device_exists(dev) == 0)        return fs;
+    if (partition.type != 0xC)                      return fs;
     
-    uint8_t* sector = ata_read28(dev, partition.start_lba);
+    uint8_t* sector = abstraction_read_sector(dev, partition.start_lba);
     uint8_t loop;
 
     fs.partition = partition;
@@ -53,11 +57,11 @@ fat32_filesystem get_fs(partition partition, ata_device dev) {
         fs.fat_name[loop] = mem_load_b(sector+0x52+loop);
     } fs.fat_name[8] = 0x0;
     
-//     if (strcmp("FAT32   ", fs.fat_name) != 0) return fs;
+    if (strcmp("FAT32   ", fs.fat_name) != 0) return fs;
     
     // sector_fs_information loading
     
-    sector = ata_read28(dev, fs.sector_fs_information);
+    sector = abstraction_read_sector(dev, fs.sector_fs_information);
     
     fs.info.first_signature = mem_load_d(sector);
     fs.info.signature_fs_info = mem_load_d(sector + 0x1E4);
@@ -74,26 +78,26 @@ fat32_filesystem get_fs(partition partition, ata_device dev) {
     return fs;
 }
 
-void list_directory(uint32_t cluster, fat32_filesystem fs, ata_device dev){
-    uint8_t* buf;
-    uint32_t ccluster = cluster;
-    uint32_t sector = cluster_to_lba(fs, ccluster);
-    uint16_t dir_size = 0;
-    uint8_t done = 0;
-    uint8_t current_col = 0;
-    uint8_t current_row = 0;
-    uint8_t oypos = 0;
-    
-    uint8_t i;
-    
-    while (done == 0) {
-        buf = ata_read28(dev, sector);
-        
-        for (i = 0; i < 16; i++) {
-            uint16_t loc = 0x20 * i;
-            
-        }
-    }
-    
-}
+// void list_directory(uint32_t cluster, fat32_filesystem fs, ata_device dev){
+//     uint8_t* buf;
+//     uint32_t ccluster = cluster;
+//     uint32_t sector = cluster_to_lba(fs, ccluster);
+//     uint16_t dir_size = 0;
+//     uint8_t done = 0;
+//     uint8_t current_col = 0;
+//     uint8_t current_row = 0;
+//     uint8_t oypos = 0;
+//     
+//     uint8_t i;
+//     
+//     while (done == 0) {
+//         buf = ata_read28(dev, sector);
+//         
+//         for (i = 0; i < 16; i++) {
+//             uint16_t loc = 0x20 * i;
+//             
+//         }
+//     }
+//     
+// }
 

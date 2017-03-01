@@ -2,6 +2,7 @@
 #define PARTITION_H
 
 #include "../drivers/ata.h"
+#include "../drivers/device_abstraction.h"
 
 typedef struct partition partition;
 typedef struct partition_table partition_table;
@@ -31,8 +32,8 @@ struct partition_table {
     partition partitions[8];
 };
 
-partition get_partition(uint8_t id, ata_device dev);
-extended_partition get_extended_partition(partition partition, ata_device dev);
-partition_table enumerate_partitions(ata_device dev);
+partition get_partition(uint8_t id, uint8_t dev);
+extended_partition get_extended_partition(partition partition, uint8_t dev);
+partition_table enumerate_partitions(uint8_t dev);
 
 #endif

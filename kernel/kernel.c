@@ -16,6 +16,7 @@
 #include "drivers/idt.h"
 #include "drivers/keyboard.h"
 #include "libs/fs/fat32.h"
+#include "drivers/device_abstraction.h"
 
 void _start(void) {
 
@@ -42,19 +43,16 @@ void _start(void) {
 
 	printf(" Done.\n");
 
-	ata_device* devices = get_ata_devices();
-
-        partition_table table; table = enumerate_partitions(devices[0]);
+        set_ata_devices(get_ata_devices());
         
-        fat32_filesystem fs = get_fs(table.partitions[0], devices[0]);
+        partition_table table; table = enumerate_partitions(0b00000000);        // 0b00000000 is ATA Primary Master
         
-        text_putstring("OEM name: ");
-        text_putstring(fs.oem_name);
-        text_putstring("\n");
+        fat32_filesystem fs = get_fs(table.partitions[0], 0b00000000);          // 0b00000000 is ATA Primary Master
         
-        text_putstring("Volume label: ");
-        text_putstring(fs.volume_name);
-        text_putstring("\n");
+        printf("OEM name: %s\n", fs.oem_name);
+        printf("Volume label: %s\n", fs.volume_name);
+        printf("Serial number: %x\n", fs.serial_number);
+        printf("Exists: %s\n", fs.exists != 0 ? "true" : "false");
             
         char last_c;
         

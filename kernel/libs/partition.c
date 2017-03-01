@@ -22,16 +22,15 @@ char* names[] = {"Empty",
                       "Extended partition LBA"
 };
 
-partition get_partition(uint8_t id, ata_device dev) {
+partition get_partition(uint8_t id, uint8_t dev) {
     partition partition;
     
-    if (dev.exists == 0) return partition;
-    
-    if (id > 3) return partition;
+    if (abstraction_device_exists(dev) == 0)    return partition;
+    if (id > 3)                                 return partition;
     
     uint16_t addr = 446 + id * 16;
     
-    uint8_t* sector = ata_read28(dev, 0);
+    uint8_t* sector = abstraction_read_sector(dev, 0);
 
     // validity check
     if (sector[510] == 0x55 && sector[511] == 0xAA) {
@@ -80,14 +79,14 @@ partition get_partition_from_sector(uint8_t id, uint8_t* sector) {
     return partition;
 }
 
-extended_partition get_extended_partition(partition partition, ata_device dev) {
+extended_partition get_extended_partition(partition partition, uint8_t dev) {
     extended_partition ext_partition;
 
-    if (dev.exists == 0)       return ext_partition;    
-    if (partition.exists == 0) return ext_partition;    
-    if (partition.type != 0xf) return ext_partition;
+    if (abstraction_device_exists(dev) == 0)        return ext_partition;
+    if (partition.exists == 0)                      return ext_partition;    
+    if (partition.type != 0xf)                      return ext_partition;
 
-    uint8_t* sector = ata_read28(dev, partition.start_lba);
+    uint8_t* sector = abstraction_read_sector(dev, partition.start_lba);
     
     ext_partition.status = partition.status;
     ext_partition.type = 0xf;
@@ -103,7 +102,7 @@ extended_partition get_extended_partition(partition partition, ata_device dev) {
     return ext_partition;
 }
 
-partition_table enumerate_partitions(ata_device dev) {
+partition_table enumerate_partitions(uint8_t dev) {
     
     uint8_t table_id = 0;
     uint8_t id = 0;

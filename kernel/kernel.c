@@ -1,3 +1,4 @@
+#include "libs/variables.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -22,15 +23,20 @@
 void _start(void) {
 	char buf[16];
         char buf_test[512] = {1};
+
+	uint32_t memory_size = mem_load_d(0x7DF9);
+	uint32_t kernel_size = mem_load_d(0x7DF5);
+	uint32_t available_page = (0x1000000+kernel_size)/0x400000;
+	if ((0x1000000+kernel_size)%0x400000) available_page++;
         
 	text_clear();
 
 	text_putstring("echidnaOS\n\n");
 
-	text_putstring(itoa(mem_load_d(0x7DF9), buf, 10));
+	text_putstring(itoa(memory_size, buf, 10));
 	text_putstring(" bytes of memory detected.\n");
 	text_putstring("The kernel is ");
-	text_putstring(itoa(mem_load_d(0x7DF5), buf, 10));
+	text_putstring(itoa(kernel_size, buf, 10));
 	text_putstring(" bytes long.\n\n");
 
 	text_putstring("Initialising PIC...");
@@ -49,7 +55,9 @@ void _start(void) {
 
 	printf(" Done.\n");
 
-	memory_map(0, 0x1800000, 0xD0000000, 0);
+	if ((available_page*0x400000)+0x400000 >= memory_size) panic("insufficient memory to start ramdrive");
+	memory_map(0, (available_page*0x400000), 0xD0000000, 0);	// allocate 4 MiB of memory for the ramdrive
+	available_page++;
 
 	mem_store_w(0xD0000000, 0xAA55);
 	mem_load_w(0xD0000000);

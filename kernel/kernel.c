@@ -20,7 +20,8 @@
 
 void _start(void) {
 	char buf[16];
-
+        char buf_test[512] = {1};
+        
 	text_clear();
 
 	text_putstring("echidnaOS\n\n");
@@ -47,18 +48,24 @@ void _start(void) {
 
 	printf(" Done.\n");
 
-        set_ata_devices(get_ata_devices());
+        devices_initalize();
         
-        partition_table table; table = enumerate_partitions(0b00000000);        // 0b00000000 is ATA Primary Master
+        partition_table table; table = enumerate_partitions("ata1");        // 0b00000000 is ATA Primary Master
         
-        fat32_filesystem fs = get_fs(table.partitions[0], 0b00000000);          // 0b00000000 is ATA Primary Master
+        fat32_filesystem fs = get_fs(table.partitions[0], "ata1");          // 0b00000000 is ATA Primary Master
         
         printf("OEM name: %s\n", fs.oem_name);
         printf("Volume label: %s\n", fs.volume_name);
         printf("Serial number: %x\n", fs.serial_number);
         printf("Exists: %s\n", fs.exists != 0 ? "true" : "false");
             
+        
+        /*disk_load_sector(char* device_name, uint32_t lba_start, uint32_t sector_count, uint32_t mem_location)*/ 
+        //disk_load_sector("ata6", 0, 1, *buf);
+        
         char last_c;
+        
+        printf("> ");
         
         while (1) {
             char c = get_last_char();
@@ -70,9 +77,26 @@ void _start(void) {
                 
                 // interactive "shell"
                 if (c == '\n') {
-                    if (strncmp("clear", get_keyboard_buffer(), 5) == 0) text_clear();
-                    if (strncmp("panic", get_keyboard_buffer(), 5) == 0) panic("manually triggered panic");
+                    char* kbuf = get_keyboard_buffer();
+                    if (strncmp("clear", kbuf, 5) == 0) text_clear();
+                    if (strncmp("panic", kbuf, 5) == 0) panic("manually triggered panic");
+                    if (strncmp("read", kbuf, 4) == 0) {
+                        kbuf += 5;
+                        disk_load_sector(kbuf, 0, 1, *buf);
+                    }
+                    
+                    if (strncmp("write", kbuf, 5) == 0) {
+                        kbuf += 6;
+                        disk_write_sector(kbuf, 0, 1, *buf);
+                    }
+                    
+                    if (strncmp("fsinit", kbuf, 6) == 0) {
+                        kbuf += 6;
+                        disk_write_sector(kbuf, 0, 1, *buf);
+                    }
                     clear_keyboard_buffer();
+                
+                    printf("> ");
                 }
             }
         }

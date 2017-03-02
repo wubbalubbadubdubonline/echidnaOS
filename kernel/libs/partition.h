@@ -32,8 +32,8 @@ struct partition_table {
     partition partitions[8];
 };
 
-partition get_partition(uint8_t id, uint8_t dev);
-extended_partition get_extended_partition(partition partition, uint8_t dev);
-partition_table enumerate_partitions(uint8_t dev);
+partition get_partition(uint8_t id, char* dev);
+extended_partition get_extended_partition(partition partition, char* dev);
+partition_table enumerate_partitions(char* dev);
 
 #endif

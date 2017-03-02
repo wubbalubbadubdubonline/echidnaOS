@@ -53,7 +53,7 @@ typedef struct fat32_filesystem {
     fat32_fs_data data;
 } fat32_filesystem;
 
-void print_fat_oem(partition partition, uint8_t dev);
-fat32_filesystem get_fs(partition partition, uint8_t dev);
+void print_fat_oem(partition partition, char* dev);
+fat32_filesystem get_fs(partition partition, char* dev);
 
 #endif

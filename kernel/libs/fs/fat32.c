@@ -4,11 +4,11 @@ uint32_t cluster_to_lba(fat32_filesystem fs, uint32_t cluster){
 	return fs.data.cluster_begin_sector+(fs.sectors_per_cluster * (cluster-2));
 }
 
-void print_fat_oem(partition partition, uint8_t dev) {
-    if (abstraction_device_exists(dev) == 0)        return;
+void print_fat_oem(partition partition, char* dev) {
     if (partition.type != 0xC)                      return;
     
-    uint8_t* sector = abstraction_read_sector(dev, partition.start_lba);
+    uint8_t sector[512] = {1};
+    disk_load_sector(dev, 0, 1, *sector);
     
     uint8_t loop;
     for(loop = 0; loop < 8; loop++) {
@@ -17,13 +17,13 @@ void print_fat_oem(partition partition, uint8_t dev) {
     }
 }
 
-fat32_filesystem get_fs(partition partition, uint8_t dev) {
+fat32_filesystem get_fs(partition partition, char* dev) {
     fat32_filesystem fs;
     
-    if (abstraction_device_exists(dev) == 0)        return fs;
     if (partition.type != 0xC)                      return fs;
     
-    uint8_t* sector = abstraction_read_sector(dev, partition.start_lba);
+    uint8_t sector[512] = {1};
+    disk_load_sector(dev, partition.start_lba, 1, *sector);
     uint8_t loop;
 
     fs.partition = partition;
@@ -61,7 +61,9 @@ fat32_filesystem get_fs(partition partition, uint8_t dev) {
     
     // sector_fs_information loading
     
-    sector = abstraction_read_sector(dev, fs.sector_fs_information);
+    
+    memset(sector, 0, 512);
+    disk_load_sector(dev, fs.sector_fs_information, 1, *sector);
     
     fs.info.first_signature = mem_load_d(sector);
     fs.info.signature_fs_info = mem_load_d(sector + 0x1E4);

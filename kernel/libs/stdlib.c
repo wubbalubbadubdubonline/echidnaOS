@@ -328,7 +328,7 @@ void *endian_swap(void * arg, int size)
  *
  */
 
-char *ftoa(float n, char *res)
+char *ftoa(float n, char *res, int fp_width)
 {
 	// Extract integer part
 	int64_t ipart = (int64_t)n;
@@ -336,6 +336,8 @@ char *ftoa(float n, char *res)
 	// Extract floating part
 	float fpart = n - (float)ipart;
 
+	fpart = fpart < 0 ? -fpart : fpart;
+
 	// convert integer part to string
 	int digits = strlen(ltoa(ipart, res, 10));
 
@@ -344,14 +346,20 @@ char *ftoa(float n, char *res)
 	// Get the value of fraction part upto given no.
 	// of points after dot. The 2nd parameter is needed
 	// to handle cases like 233.007.
-	fpart = fpart * pow(10, 8);
+	while ( fp_width-- )
+	{
+		fpart *= 10;
+		ipart = (int64_t)fpart;
+		*(res + digits++) = '0' + (char)ipart;
+		fpart -= (float)ipart;
+	}
 
-	ltoa((int64_t)fpart, res + digits, 10);
+	res[digits] = '\0';
 
 	return res;
 }
 
-char *dtoa(double n, char *res)
+char *dtoa(double n, char *res, int fp_width)
 {
 	// Extract integer part
 	int64_t ipart = (int64_t)n;
@@ -359,6 +367,8 @@ char *dtoa(double n, char *res)
 	// Extract floating part
 	double fpart = n - (double)ipart;
 
+	fpart = fpart < 0 ? -fpart : fpart;
+
 	// convert integer part to string
 	int digits = strlen(ltoa(ipart, res, 10));
 
@@ -367,9 +377,15 @@ char *dtoa(double n, char *res)
 	// Get the value of fraction part upto given no.
 	// of points after dot. The 2nd parameter is needed
 	// to handle cases like 233.007.
-	fpart = fpart * pow(10, 16);
+	while ( fp_width-- )
+	{
+		fpart *= 10;
+		ipart = (int64_t)fpart;
+		*(res + digits++) = '0' + (char)ipart;
+		fpart -= (double)ipart;
+	}
 
-	ltoa((int64_t)fpart, res + digits, 10);
+	res[digits] = '\0';
 
 	return res;
 }

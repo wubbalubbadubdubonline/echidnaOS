@@ -14,7 +14,8 @@ int puts(const char *str)
 {
     int len = strlen(str);
     text_putstring(str);
-    return len;
+    text_putchar('\n');
+    return ++len;
 }
 
 #define MOD_NONE 0
@@ -196,6 +197,7 @@ int printf(const char *format, ...)
                     case 'i':
                     case 'x':
                     case 'u':
+                    case 'f':
                         mod = MOD_LONG;
                         format++;
                         break;
@@ -232,7 +234,7 @@ int printf(const char *format, ...)
                             for ( int i = width - length; i; i-- )
                                 text_putchar(' ');
 
-                            text_putstring(s);
+                            puts(s);
                         }
                     }
                     else
@@ -251,7 +253,7 @@ int printf(const char *format, ...)
 
                 continue;
             }
-            //done?
+            //done
             if( *format == 'd' || *format == 'i' )
             {
                 char buf[21];
@@ -283,24 +285,27 @@ int printf(const char *format, ...)
 
                 _len = strlen(ltoa(n, buf, 10));
                 width -= _len;
+                int i = 0;
 
-                if ( sign && buf[0] != '-' ) width--, count++;
+                if ( sign && buf[0] != '-' ) 
+                    text_putchar('+'), width--, count++;
+
+                else if ( buf[0] == '-' )
+                    text_putchar(buf[i++]);
+
 
                 count += _len + (width > 0 ? width : 0);
 
-                if ( pad && !(pad & PAD_RIGHT) )
+                if ( (width > 0) && !(pad & PAD_RIGHT) )
                 {
-                    if ( sign && buf[0] != '-' && padchar == '0' )
-                        text_putchar('+');
-
                     for ( ; width > 0; width-- ) 
                         text_putchar(padchar), count++;
 
-                    if ( sign && buf[0] != '-' && padchar == ' ')
-                        text_putchar('+');
+//                    if ( sign && buf[0] != '-' && padchar == ' ')
+//                        text_putchar('+');
                 }
 
-                text_putstring(buf);
+                text_putstring(&buf[i]);
 
                 if ( pad & PAD_RIGHT )
                     for ( ; width > 0; width-- )
@@ -308,7 +313,7 @@ int printf(const char *format, ...)
 
                 continue;
             }
-            //todo
+            //done
             if( *format == 'x' )
             {
                 char buf[16];
@@ -343,7 +348,7 @@ int printf(const char *format, ...)
 
                 count += _len + (width > 0 ? width : 0);
 
-                if ( pad && !(pad & PAD_RIGHT) )
+                if ( (width > 0) && !(pad & PAD_RIGHT) )
                     for ( ; width > 0; width-- ) 
                         text_putchar(padchar), count++;
 
@@ -355,7 +360,7 @@ int printf(const char *format, ...)
 
                 continue;
             }
-            //todo
+            //done
             if( *format == 'X' )
             {
                 char buf[16];
@@ -390,9 +395,9 @@ int printf(const char *format, ...)
 
                 count += _len + (width > 0 ? width : 0);
 
-                if ( pad && !(pad & PAD_RIGHT) )
+                if ( (width > 0) && !(pad & PAD_RIGHT) )
                     for ( ; width > 0; width-- ) 
-                        text_putchar(padchar), count++;
+                        text_putchar(padchar);
 
                 for ( int i = 0; buf[i] = toupper(buf[i]); i++ );
 
@@ -403,11 +408,12 @@ int printf(const char *format, ...)
                         text_putchar(' ');
                 continue;
             }
-            //todo
+            //done
             if( *format == 'u' )
             {
                 char buf[21], padchar;
                 uint64_t n;
+
                 switch ( mod )
                 {
                     case MOD_BYTE:
@@ -433,7 +439,7 @@ int printf(const char *format, ...)
                 int _len = strlen(_ltoa(n, buf, 10, 0));
 
                 count += _len;
-                if ( pad )
+                if ( width > 0 )
                 {
                     width -= _len;
                     count += width > 0 ? width : 0;
@@ -446,7 +452,7 @@ int printf(const char *format, ...)
                     }
                 }
 
-                text_putstring(buf);
+                puts(buf);
 
                 if ( pad & PAD_RIGHT )
                     for ( ; width > 0; width-- )
@@ -462,13 +468,77 @@ int printf(const char *format, ...)
                 count++;
                 continue;
             }
-
-/*            if ( tolower(*format) == 'f' )
+            //in progress
+            if ( tolower(*format) == 'f' )
             {
-                //
+                double n;
+                int len;
+                char padchar;
+
+                if ( mod & MOD_LONG )
+                {
+                    n = va_arg(args, double);
+                    fp_width = fp_width > -1 ? fp_width : 16;
+                }
+                else
+                {
+                    n = va_arg(args, float);
+                    fp_width = fp_width > -1 ? fp_width : 8;
+                }
+
+                if ( n < 1e+30  && n > -1e+29 )
+                    len = 50;
+                else if ( n < 1e+80 && n > -1e+79 )
+                    len = 100;
+                else if ( n < 1e+130 && n > -1e+129 )
+                    len = 150;
+                else if ( n < 1e+180 && n > -1e+179 )
+                    len = 200;
+                else if ( n < 1e+230 && n > -1e+229 )
+                    len = 250;
+                else
+                    len = 328;
+
+                char buf[len];
+
+                int _len = strlen(dtoa(n, buf, fp_width));
+                width -= _len;
+                count += _len;
+
+                if ( sign && buf[0] != '-' )
+                    text_putchar('+'), width--, count++;
+
+                count += width;
+
+                padchar = pad & PAD_ZERO ? '0' : ' ';
+
+                if ( width > 0 )
+                {
+                    int i = 0;
+
+                    // put sign if negative
+                    if ( buf[0] == '-' )
+                        text_putchar(buf[i++]);
+
+                    // pad left
+                    if ( !(pad & PAD_RIGHT) )
+                        while ( width-- )
+                            text_putchar(padchar);
+
+                    // print float
+                    text_putstring(&buf[i]);
+
+                    // pad right
+                    if ( pad & PAD_RIGHT )
+                        while ( width-- )
+                            text_putchar(' ');
+
+                }
+                else
+                    text_putstring(buf);
             }
 
-            if ( tolower(*format) == 'g' )
+/*            if ( tolower(*format) == 'g' )
             {
                 //
             }

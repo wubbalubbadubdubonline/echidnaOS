@@ -17,7 +17,7 @@ char  *strncat(char *, const char *, size_t);
 char  *strchr(char *, int);
 char  *strrchr(char *, int);
 char  *strstr(char *, const char *);
-char  *strpbrk(char *, const char *);
+char  *strpbrk(char *, char *);
 
 void  *memset(void *, int, size_t);
 int    memcmp(const void *, const void *, size_t);

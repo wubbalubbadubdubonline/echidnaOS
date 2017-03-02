@@ -9,8 +9,8 @@ int atoi(const char *);
 long atol(const char *);
 long long atoll(const char *);
 void *endian_swap(void *, int);
-char *ftoa(float, char *);
-char *dtoa(double, char *);
+char *ftoa(float, char *, int);
+char *dtoa(double, char *, int);
 int puts(const char *);
 int printf(const char *, ...);
 

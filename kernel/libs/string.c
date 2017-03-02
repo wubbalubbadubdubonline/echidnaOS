@@ -140,11 +140,11 @@ char *strstr(char *str1, const char *str2)
   }
 }
 
-char *strpbrk(char *str, const char *targets)
+char *strpbrk(char *str, char *targets)
 {
   for ( ; *str; str++ )
   {
-    for ( char * sp = targets; *sp; sp++ )
+    for ( char *sp = targets; *sp; sp++ )
     {
       if ( *str == *sp ) return sp;
     }

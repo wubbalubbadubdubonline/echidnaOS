@@ -1,6 +1,6 @@
 #include "partition.h"
 #include "../drivers/system.h"
-#include "stdlib.h"
+#include <stdlib.h>
 
 static partition_table table;
 

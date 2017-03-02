@@ -1,8 +1,8 @@
 #ifndef __SYSTEM_H__
 #define __SYSTEM_H__
 
-#include "../libs/stdint.h"
-#include "../libs/stddef.h"
+#include <stdint.h>
+#include <stddef.h>
 
 #define system_halt() ({					\
 	asm volatile ("cli; hlt");				\

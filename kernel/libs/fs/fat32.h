@@ -1,9 +1,9 @@
 #ifndef FAT32_FS_H
 #define FAT32_FS_H
 
-#include "../stdint.h"
-#include "../stddef.h"
-#include "../string.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 #include "../partition.h"
 #include "../../drivers/textdrv.h"
 #include "../../drivers/system.h" 

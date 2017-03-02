@@ -1,9 +1,9 @@
 #ifndef __KEYBOARD_H__
 #define __KEYBOARD_H__
 
-#include "../libs/stdint.h"
-#include "../libs/stddef.h"
-#include "../libs/string.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
 #define SC_MAX 0x57
 #define SC_CAPSLOCK 0x3A

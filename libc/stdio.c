@@ -4,7 +4,7 @@
 #include "string.h"
 #include "stdarg.h"
 #include "ctype.h"
-#include "../drivers/textdrv.h"
+#include "syscalls.h"
 
 char *_itoa(int, char *, int, int);
 char *_ltoa(long, char *, int, int);

@@ -1,12 +1,12 @@
-#include "libs/stddef.h"
-#include "libs/stdint.h"
-#include "libs/string.h"
-#include "libs/stdlib.h"
-#include "libs/stdarg.h"
-#include "libs/stdio.h"
-#include "libs/math.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <math.h>
 #include "libs/partition.h"
-#include "libs/ctype.h"
+#include <ctype.h>
 #include "libs/panic.h"
 #include "drivers/system.h"
 #include "drivers/textdrv.h"
@@ -19,21 +19,25 @@
 #include "drivers/device_abstraction.h"
 
 void _start(void) {
+	char buf[16];
 
 	text_clear();
 
-	printf("echidnaOS\n\n");
+	text_putstring("echidnaOS\n\n");
 
-	printf("%d bytes of memory detected.\n", mem_load_d(0x7DF9));
-	printf("The kernel is %d bytes long.\n\n", mem_load_d(0x7DF5));
+	text_putstring(itoa(mem_load_d(0x7DF9), buf, 10));
+	text_putstring(" bytes of memory detected.\n");
+	text_putstring("The kernel is ");
+	text_putstring(itoa(mem_load_d(0x7DF5), buf, 10));
+	text_putstring(" bytes long.\n\n");
 
-	printf("Initialising PIC...");
+	text_putstring("Initialising PIC...");
 
 	map_PIC(0x20, 0x28);	// map the PIC0 at int 0x20-0x27 and PIC1 at 0x28-0x2F
 
-	printf(" Done.\n");
+	text_putstring(" Done.\n");
 
-	printf("Building descriptor tables...");
+	text_putstring("Building descriptor tables...");
 
 	create_GDT();		// build the GDT
 	create_IDT();		// build the IDT

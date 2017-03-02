@@ -1,8 +1,8 @@
 #ifndef DEVICE_ABSTRACTION_H
 #define DEVICE_ABSTRACTION_H
 
-#include "../libs/stdint.h"
-#include "../libs/stddef.h"
+#include <stdint.h>
+#include <stddef.h>
 #include "ata.h"
 
 /*

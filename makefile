@@ -1,10 +1,10 @@
-C_FILES = $(wildcard kernel/*.c wildcard kernel/libs/*.c wildcard kernel/drivers/*.c wildcard kernel/libs/fs/*.c)
+C_FILES = $(wildcard kernel/*.c wildcard libc/*.c wildcard kernel/libs/*.c wildcard kernel/drivers/*.c wildcard kernel/libs/fs/*.c)
 ASM_FILES = $(wildcard kernel/drivers/*.asm)
 C_OBJ = ${C_FILES:.c=.o}
 ASM_OBJ = ${ASM_FILES:.asm=.o}
 OBJ = ${C_OBJ} ${ASM_OBJ}
 
-CFLAGS = -std=gnu99 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -masm=intel -m32
+CFLAGS = -std=gnu99 -nostdlib -nostartfiles -nodefaultlibs -fno-builtin -isystem ./libc/ -masm=intel -m32
 LDFLAGS = -T linker_script --oformat binary -melf_i386
 NASMFLAGS = -f elf32
 

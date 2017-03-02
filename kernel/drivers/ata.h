@@ -1,8 +1,8 @@
 #ifndef ATA_H
 #define ATA_H
 
-#include "../libs/stdint.h"
-#include "../libs/stddef.h"
+#include <stdint.h>
+#include <stddef.h>
 #include "system.h"
 #include "textdrv.h"
 

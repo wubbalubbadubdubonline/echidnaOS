@@ -23,7 +23,10 @@
 void _start(void) {
 	char buf[16];
         char buf_test[512] = {1};
-
+        uint8_t selected_partition;
+        uint32_t lba1, lba2, count = 1;
+        
+        
 	uint32_t memory_size = mem_load_d(0x7DF9);
 	uint32_t kernel_size = mem_load_d(0x7DF5);
 	uint32_t available_page = (0x1000000+kernel_size)/0x400000;
@@ -43,7 +46,8 @@ void _start(void) {
 
 	map_PIC(0x20, 0x28);	// map the PIC0 at int 0x20-0x27 and PIC1 at 0x28-0x2F
 
-	text_putstring(" Done.\n");
+        text_set_cursor_pos(74, text_get_cursor_pos_y());
+	text_putstring("[Done]\n");
 
 	text_putstring("Building descriptor tables...");
 
@@ -53,7 +57,8 @@ void _start(void) {
 	load_segments();	// activate the GDT
 	enable_ints();		// activate the IDT
 
-	printf(" Done.\n");
+        text_set_cursor_pos(74, text_get_cursor_pos_y());
+	text_putstring("[Done]\n");
 
 	if ((available_page*0x400000)+0x400000 >= memory_size) panic("insufficient memory to start ramdrive");
 	memory_map(0, (available_page*0x400000), 0xD0000000, 0);	// allocate 4 MiB of memory for the ramdrive
@@ -64,20 +69,10 @@ void _start(void) {
 
         devices_initalize();
         
-        partition_table table; table = enumerate_partitions("ata1");        // 0b00000000 is ATA Primary Master
-        
-        fat32_filesystem fs = get_fs(table.partitions[0], "ata1");          // 0b00000000 is ATA Primary Master
-        
-        printf("OEM name: %s\n", fs.oem_name);
-        printf("Volume label: %s\n", fs.volume_name);
-        printf("Serial number: %x\n", fs.serial_number);
-        printf("Exists: %s\n", fs.exists != 0 ? "true" : "false");
-            
-        
-        /*disk_load_sector(char* device_name, uint32_t lba_start, uint32_t sector_count, uint32_t mem_location)*/ 
-        //disk_load_sector("ata6", 0, 1, *buf);
-        
         char last_c;
+        
+        fat32_filesystem fs;
+        partition_table table; 
         
         printf("> ");
         
@@ -96,17 +91,58 @@ void _start(void) {
                     if (strncmp("panic", kbuf, 5) == 0) panic("manually triggered panic");
                     if (strncmp("read", kbuf, 4) == 0) {
                         kbuf += 5;
-                        disk_load_sector(kbuf, 0, 1, *buf);
+                        disk_load_sector(kbuf, lba1, count, *buf);
                     }
                     
                     if (strncmp("write", kbuf, 5) == 0) {
                         kbuf += 6;
-                        disk_write_sector(kbuf, 0, 1, *buf);
+                        disk_write_sector(kbuf, lba1, count, *buf);
                     }
                     
-                    if (strncmp("fsinit", kbuf, 6) == 0) {
-                        kbuf += 6;
-                        disk_write_sector(kbuf, 0, 1, *buf);
+                    if (strncmp("initpart", kbuf, 8) == 0) {
+                        kbuf += 9;
+                        
+                        table = enumerate_partitions(kbuf);      
+                    }
+                    
+                    if (strncmp("selectpart", kbuf, 10) == 0) {
+                        kbuf += 11;
+                        selected_partition = atoi(kbuf);
+                        
+                    }
+                    
+                    if (strncmp("selectlba1", kbuf, 10) == 0) {
+                        kbuf += 11;
+                        lba1 = atoi(kbuf);
+                    }
+                    
+                    if (strncmp("selectlba2", kbuf, 10) == 0) {
+                        kbuf += 11;
+                        lba2 = atoi(kbuf);
+                    }
+                    
+                    if (strncmp("selectcount", kbuf, 11) == 0) {
+                        kbuf += 12;
+                        count = atoi(kbuf);
+                    }
+                    
+                    
+                    if (strncmp("sectcopy", kbuf, 8) == 0) {
+                        kbuf += 9;
+                        char* k = strstr(kbuf, " ");
+                        kbuf[k - kbuf] = '\0';
+                        disk_load_sector(kbuf, lba1, count, 0xD0000000);
+                        disk_write_sector(k, lba2, count, 0xD0000000);
+                    }
+                    
+                    if (strncmp("initfs", kbuf, 6) == 0) {
+                        kbuf += 7;
+                        fs = get_fs(table.partitions[selected_partition], kbuf);                         
+                        printf("OEM name: %s\n", fs.oem_name);
+                        printf("Volume label: %s\n", fs.volume_name);
+                        printf("Serial number: %x\n", fs.serial_number);
+                        printf("Exists: %s\n", fs.exists != 0 ? "true" : "false");
+                        
                     }
                     clear_keyboard_buffer();
                 

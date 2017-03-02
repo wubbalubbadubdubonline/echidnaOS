@@ -8,7 +8,7 @@ void print_fat_oem(partition partition, char* dev) {
     if (partition.type != 0xC)                      return;
     
     uint8_t sector[512] = {1};
-    disk_load_sector(dev, 0, 1, *sector);
+    disk_load_sector(dev, 0, 1, (uint32_t)sector);
     
     uint8_t loop;
     for(loop = 0; loop < 8; loop++) {
@@ -23,7 +23,7 @@ fat32_filesystem get_fs(partition partition, char* dev) {
     if (partition.type != 0xC)                      return fs;
     
     uint8_t sector[512] = {1};
-    disk_load_sector(dev, partition.start_lba, 1, *sector);
+    disk_load_sector(dev, partition.start_lba, 1, (uint32_t)sector);
     uint8_t loop;
 
     fs.partition = partition;
@@ -63,7 +63,7 @@ fat32_filesystem get_fs(partition partition, char* dev) {
     
     
     memset(sector, 0, 512);
-    disk_load_sector(dev, fs.sector_fs_information, 1, *sector);
+    disk_load_sector(dev, fs.sector_fs_information, 1, (uint32_t)sector);
     
     fs.info.first_signature = mem_load_d(sector);
     fs.info.signature_fs_info = mem_load_d(sector + 0x1E4);

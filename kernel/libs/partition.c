@@ -30,12 +30,12 @@ partition get_partition(uint8_t id, char* dev) {
     uint16_t addr = 446 + id * 16;
     
     uint8_t sector[512] = {1};
-    disk_load_sector(dev, partition.start_lba, 1, *sector);
+    disk_load_sector(dev, 0, 1, (uint32_t)sector);
     
     // validity check
     if (sector[510] == 0x55 && sector[511] == 0xAA) {
     } else {
-        text_putstring("Drive not bootable!");
+        text_putstring("Drive not bootable!\n");
         return partition;
     }  
     
@@ -61,7 +61,7 @@ partition get_partition_from_sector(uint8_t id, uint8_t* sector) {
     // validity check
     if (sector[510] == 0x55 && sector[511] == 0xAA) {
     } else {
-        text_putstring("Drive not bootable!");
+        text_putstring("Drive not bootable!\n");
         return partition;
     }  
     
@@ -86,7 +86,7 @@ extended_partition get_extended_partition(partition partition, char* dev) {
     if (partition.type != 0xf)                      return ext_partition;
 
     uint8_t sector[512] = {1};
-    disk_load_sector(dev, partition.start_lba, 1, *sector);
+    disk_load_sector(dev, partition.start_lba, 1, (uint32_t)sector);
     
     ext_partition.status = partition.status;
     ext_partition.type = 0xf;
@@ -116,12 +116,8 @@ partition_table enumerate_partitions(char* dev) {
         
         if (part.exists != 0) {
             
-            text_putstring("- ");
-            text_putstring(names[part.type]);
-            text_putstring(" - ");
-            text_putstring(itoa((part.sector_count), buf, 16));
-            text_putstring(" sectors\n");
-        
+            printf("- %s - %x sectors\n", names[part.type], part.sector_count);
+            
             if (part.type == 0xf) {
                 extended_partition ext_part = get_extended_partition(part, dev);
                 uint8_t id_;
@@ -129,12 +125,8 @@ partition_table enumerate_partitions(char* dev) {
                     partition part_ = ext_part.partitions[id_];
                     
                     if (part_.exists != 0) {
-                        text_putstring("    - ");
-                        text_putstring(names[part_.type]);
-                        text_putstring(" - ");
-                        text_putstring(itoa((part_.sector_count), buf, 16));
-                        text_putstring(" sectors\n");
-                        
+                        printf("    - %s - %x sectors\n", names[part_.type], part_.sector_count);
+            
                         // ------------------------
                         table.partitions[table_id].status = part_.status;
                         table.partitions[table_id].type = part_.type;

@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "libs/partition.h"
+#include "libs/memory.h"
 #include <ctype.h>
 #include "libs/panic.h"
 #include "drivers/system.h"
@@ -47,6 +48,11 @@ void _start(void) {
 	enable_ints();		// activate the IDT
 
 	printf(" Done.\n");
+
+	memory_map(0, 0x1800000, 0xD0000000, 0);
+
+	mem_store_w(0xD0000000, 0xAA55);
+	mem_load_w(0xD0000000);
 
         devices_initalize();
         

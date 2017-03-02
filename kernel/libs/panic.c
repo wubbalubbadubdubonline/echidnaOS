@@ -1,6 +1,7 @@
 #include "panic.h"
 
 void panic(const char *msg) {
+	disable_ints();
 	text_set_text_palette(0x4E);
 	text_clear();
 	text_disable_cursor();

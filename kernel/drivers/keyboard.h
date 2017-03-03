@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include "textdrv.h"
+#include "../libs/panic.h"
 
 #define SC_MAX 0x57
 #define SC_CAPSLOCK 0x3A
@@ -16,9 +18,8 @@
 
 void keyboard_handler(uint8_t input_byte);
 
-char* get_keyboard_buffer();
-void clear_keyboard_buffer();
-char get_last_char();
-void clear_last_char();
+char keyboard_fetch_char(void);
+char keyboard_getchar(void);
+void keyboard_getstring(char* string, uint32_t limit);
 
 #endif

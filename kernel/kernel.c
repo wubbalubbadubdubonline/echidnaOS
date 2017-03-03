@@ -20,6 +20,9 @@
 #include "libs/fs/fat32.h"
 #include "drivers/device_abstraction.h"
 
+void done_msg(void);
+void kernel_shell(void);
+
 void _start(void) {
 	char buf[16];
         char buf_test[512] = {1};
@@ -46,8 +49,7 @@ void _start(void) {
 
 	map_PIC(0x20, 0x28);	// map the PIC0 at int 0x20-0x27 and PIC1 at 0x28-0x2F
 
-        text_set_cursor_pos(74, text_get_cursor_pos_y());
-	text_putstring("[Done]\n");
+        done_msg();
 
 	text_putstring("Building descriptor tables...");
 
@@ -57,46 +59,30 @@ void _start(void) {
 	load_segments();	// activate the GDT
 	enable_ints();		// activate the IDT
 
-        text_set_cursor_pos(74, text_get_cursor_pos_y());
-	text_putstring("[Done]\n");
+        done_msg();
 
 	if ((available_page*0x400000)+0x400000 >= memory_size) panic("insufficient memory to start ramdrive");
 	memory_map(0, (available_page*0x400000), 0xD0000000, 0);	// allocate 4 MiB of memory for the ramdrive
 	available_page++;
 
-	mem_store_w(0xD0000000, 0xAA55);
-	mem_load_w(0xD0000000);
+	kernel_shell();
 
-        devices_initalize();
+// anyone working on this stuff below should implement it properly into separate functions, then add commands to the shell below
+
+      //  devices_initalize();
         
-        char last_c;
-        
-        fat32_filesystem fs;
-        partition_table table; 
-        
-        printf("> ");
-        
-        while (1) {
-            char c = get_last_char();
-            
-            if (c != last_c) {
-                text_putchar(c);
-                last_c = c;
-                clear_last_char();
-                
-                // interactive "shell"
-                if (c == '\n') {
-                    char* kbuf = get_keyboard_buffer();
-                    if (strncmp("clear", kbuf, 5) == 0) text_clear();
-                    if (strncmp("panic", kbuf, 5) == 0) panic("manually triggered panic");
-                    if (strncmp("read", kbuf, 4) == 0) {
+   //     fat32_filesystem fs;
+   //     partition_table table;
+
+	/*
+                    if (strncmp("read", input, 4) == 0) {
                         kbuf += 5;
-                        disk_load_sector(kbuf, lba1, count, *buf);
+                        disk_load_sector(input, lba1, count, *buf);
                     }
                     
-                    if (strncmp("write", kbuf, 5) == 0) {
+                    if (strncmp("write", input, 5) == 0) {
                         kbuf += 6;
-                        disk_write_sector(kbuf, lba1, count, *buf);
+                        disk_write_sector(input, lba1, count, *buf);
                     }
                     
                     if (strncmp("initpart", kbuf, 8) == 0) {
@@ -147,11 +133,39 @@ void _start(void) {
                     clear_keyboard_buffer();
                 
                     printf("> ");
-                }
-            }
-        }
-        
-	printf("\nSoft halting system.");
-	system_soft_halt();
 
+		
+                }
+            } */
+
+}
+
+void done_msg(void) {
+	char old_palette = text_get_text_palette();
+	text_set_cursor_pos(74, text_get_cursor_pos_y());
+	text_putchar('[');
+	text_set_text_palette(0x02);
+	text_putstring("DONE");
+	text_set_text_palette(old_palette);
+	text_putchar(']');
+}
+
+void kernel_shell(void) {
+	char input[256]={0};
+
+	// kernel side shell
+
+	text_putstring("\nKernel shell: \n\n");
+
+	while (1) {
+		text_putstring("> ");
+
+		keyboard_getstring(input, 256);
+
+		text_putchar('\n');
+
+		if (strcmp("clear", input) == 0) text_clear();
+		else if (strcmp("panic", input) == 0) panic("manually triggered panic");
+		else if (input[0]!=0) text_putstring("Invalid command.\n");
+	}
 }

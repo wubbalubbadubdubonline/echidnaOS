@@ -2,70 +2,79 @@
 
 static uint8_t capslock_active = 0;
 static char keyboard_buffer[256];
-static uint16_t buffer_index;
-static char last_char;
+static uint16_t buffer_index=0;
 
-const char *sc_name[] = { "ERROR", "Esc", "1", "2", "3", "4", "5", "6", 
-    "7", "8", "9", "0", "-", "=", "Backspace", "Tab", "Q", "W", "E", 
-        "R", "T", "Y", "U", "I", "O", "P", "[", "]", "Enter", "Lctrl", 
-        "A", "S", "D", "F", "G", "H", "J", "K", "L", ";", "'", "`", 
-        "LShift", "\\", "Z", "X", "C", "V", "B", "N", "M", ",", ".", 
-        "/", "RShift", "Keypad *", "LAlt", "Spacebar"};
-const char sc_ascii[] = { '?', '?', '1', '2', '3', '4', '5', '6',     
-    '7', '8', '9', '0', '-', '=', '?', '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 
-        'U', 'I', 'O', 'P', '[', ']', '?', '?', 'A', 'S', 'D', 'F', 'G', 
-        'H', 'J', 'K', 'L', ';', '\'', '`', '?', '\\', 'Z', 'X', 'C', 'V', 
-        'B', 'N', 'M', ',', '.', '/', '?', '?', '?', ' '};
+const char sc_ascii_upper[] = { '\0', '?', '1', '2', '3', '4', '5', '6',     
+    '7', '8', '9', '0', '-', '=', '\b', '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 
+        'U', 'I', 'O', 'P', '[', ']', '\n', '\0', 'A', 'S', 'D', 'F', 'G', 
+        'H', 'J', 'K', 'L', ';', '\'', '`', '\0', '\\', 'Z', 'X', 'C', 'V', 
+        'B', 'N', 'M', ',', '.', '/', '\0', '\0', '\0', ' '};
+
+const char sc_ascii_lower[] = { '\0', '?', '1', '2', '3', '4', '5', '6',     
+    '7', '8', '9', '0', '-', '=', '\b', '\t', 'q', 'w', 'e', 'r', 't', 'y', 
+        'u', 'i', 'o', 'p', '[', ']', '\n', '\0', 'a', 's', 'd', 'f', 'g', 
+        'h', 'j', 'k', 'l', ';', '\'', '`', '\0', '\\', 'z', 'x', 'c', 'v', 
+        'b', 'n', 'm', ',', '.', '/', '\0', '\0', '\0', ' '};
 
 void keyboard_handler(uint8_t input_byte) {
-        if (input_byte == SC_CAPSLOCK || input_byte == SC_LEFT_SHIFT || input_byte == SC_RIGHT_SHIFT || input_byte == SC_LEFT_SHIFT_REL || input_byte == SC_RIGHT_SHIFT_REL) {
-                capslock_active = !capslock_active;
-		} else if (input_byte < SC_MAX) {
-            if (input_byte == SC_ENTER) {
-                if (buffer_index < 256) {
-                    keyboard_buffer[buffer_index] = '\n';
-                    buffer_index++;
-                    last_char = '\n';
-                }
-                
-            } else if (input_byte == SC_BACKSPACE) {
-                if (buffer_index < 256) {
-                    if (buffer_index > 0) {
-                        keyboard_buffer[buffer_index] = '\0';
-                        buffer_index--;
-                        last_char = '\b';
-                    }
-                }
-                
-            } else {
-                char c = sc_ascii[input_byte];
-                if (capslock_active == 0) {
-                    c |= 0x20;
-                }
-                
-                if (buffer_index < 256) {
-                    keyboard_buffer[buffer_index] = c;
-                    buffer_index++;
-                    last_char = c;
-                }
-            }
-        }
+	char c='\0';
+	if (input_byte == SC_CAPSLOCK || input_byte == SC_LEFT_SHIFT || input_byte == SC_RIGHT_SHIFT || input_byte == SC_LEFT_SHIFT_REL || input_byte == SC_RIGHT_SHIFT_REL) {
+		capslock_active = !capslock_active;
+	} else if (buffer_index < 256) {
+		if (input_byte < SC_MAX) {
+			if (capslock_active == 0) {
+				c = sc_ascii_lower[input_byte];
+			} else {
+				c = sc_ascii_upper[input_byte];
+			}
+			keyboard_buffer[buffer_index] = c;
+			buffer_index++;
+		}
+	} else {
+		panic("keyboard buffer overflow");
+	}
 }
 
-char* get_keyboard_buffer() {
-    return keyboard_buffer;
+char keyboard_fetch_char(void) {
+	uint16_t x;
+	char c;
+	if (buffer_index) {
+		buffer_index--;
+		c = keyboard_buffer[0];
+		for (x=0; x<255; x++) {
+			keyboard_buffer[x] = keyboard_buffer[x+1];
+		}
+		return c;
+	} else {
+		return '\0';
+	}
 }
 
-void clear_keyboard_buffer() {
-    memset(keyboard_buffer, 0, 256);
-    buffer_index = 0;
+char keyboard_getchar(void) {
+	char c='\0';
+	while (c=='\0') {
+		c = keyboard_fetch_char();
+	}
+	return c;
 }
 
-char get_last_char() {
-    return last_char;
-}
-
-void clear_last_char() {
-    last_char = 0;
-    
+void keyboard_getstring(char* string, uint32_t limit) {
+	uint32_t x=0;
+	char c='\0';
+	while (1) {
+		c = keyboard_getchar();
+		if (c=='\b') {
+			if (x) {
+				x--;
+				text_putchar(c);
+			}
+		} else if (c=='\n') {
+			break;
+		} else if (x<(limit-1)) {
+			string[x] = c;
+			x++;
+			text_putchar(c);
+		}
+	}
+	string[x] = 0x00;
 }

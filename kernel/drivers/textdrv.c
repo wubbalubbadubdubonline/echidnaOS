@@ -18,8 +18,8 @@ void scroll(void);
 
 int cursor_offset = 0;
 int cursor_status = 1;
-char cursor_palette = 0x07;
-char text_palette = 0x70;
+char cursor_palette = 0x70;
+char text_palette = 0x07;
 
 /* internal functions */
 

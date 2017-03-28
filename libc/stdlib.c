@@ -356,6 +356,93 @@ long strtol(const char *str, char **endptr, int base)
 	}
 }
 
+long strtoul(const char *str, char **endptr, int base)
+{
+	unsigned long num = 0;
+	int parse_success = 0;
+	const char *sptr = str;
+	char signchar = 0;
+
+	//skip arbitrary space at beginning of string
+	while ( isspace(*sptr) ) sptr++;
+
+	//optional sign char
+	if ( *sptr == '+' || *sptr == '-' )
+		signchar = *sptr++;
+
+	//if base is 0, decide whether to use base 8, 10, or 16
+	if ( base == 0 )
+	{
+		if ( strncmp(sptr, "0x", 2) == 0 )
+		{
+			base = 16;
+			sptr += 2;
+		}
+		else if ( *sptr == '0' )
+		{
+			base = 8;
+			sptr++;
+		}
+		else
+			base = 10;
+	}
+	//otherwise, check to make sure base is valid
+	else if ( base < 2 || base > 32 )
+	{
+		if ( endptr )
+			*endptr = str;
+
+		return 0;
+	}
+
+	//base 16 numbers are allowed to be prefixed with 0x
+	if ( base == 16 )
+		if ( *sptr == '0' && tolower(*(sptr+1)) == 'x' )
+			sptr += 2;
+
+	//parse number
+	for (;;)
+	{
+		int i = 0;
+
+		//map char to value
+		while ( i < base && tolower(*sptr) != base_digits[i] )
+			i++;
+
+
+		//match not found
+		if ( i == base )
+		{
+			if ( endptr )
+			{
+				if ( parse_success )
+					*endptr = sptr;
+				else
+					*endptr = str;
+			}
+
+			return signchar == '-' ? -num : num;
+		}
+
+		//match found
+		parse_success = 1;
+		sptr++;
+
+		//check overflow
+		/*
+		 * strtol keeps parsing until the first invalid character, so although
+		 * we will no longer make any changes to num after we first detect
+		 * overflow, we will keep parsing until an invalid character is found.
+		 */
+		if ( num * base + i < num )
+			continue;
+
+		//match found and no overflow detected
+		else
+			num = num * base + i;
+	}
+}
+
 #define BIG_ENDIAN 1
 #define LITTLE_ENDIAN 2
 #define LITTLE_ENDIAN_FLOAT 4

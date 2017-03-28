@@ -9,6 +9,7 @@ int atoi(const char *);
 long atol(const char *);
 //long long atoll(const char *);
 long strtol(const char *, char **, int);
+long strtoul(const char *, char **, int);
 void *endian_swap(void *, int);
 char *ftoa(float, char *, int);
 char *dtoa(double, char *, int);

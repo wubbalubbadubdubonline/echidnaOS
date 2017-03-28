@@ -22,6 +22,8 @@
 
 void done_msg(void);
 void kernel_shell(void);
+void peek(char *);
+void get_register_value(char *, void *);
 
 void _start(void) {
 	char buf[16];
@@ -164,8 +166,1264 @@ void kernel_shell(void) {
 
 		text_putchar('\n');
 
-		if (strcmp("clear", input) == 0) text_clear();
-		else if (strcmp("panic", input) == 0) panic("manually triggered panic");
-		else if (input[0]!=0) text_putstring("Invalid command.\n");
+		if      (strcmp("clear", input) == 0)       text_clear();
+		else if (strcmp("panic", input) == 0)       panic("manually triggered panic");
+        else if (strncmp("peek", input, 4) == 0)    peek(&input[4]);
+		else if (input[0]!=0)                       text_putstring("Invalid command.\n");
 	}
+}
+
+void peek(char *argstring)
+{
+    long type, repeat, repr, output, indirection;
+    type = repr = output = indirection = 0;
+    intptr_t location = 0;
+    repeat = 1;
+
+#define TYPE_BYTE    1
+#define TYPE_WORD    2
+#define TYPE_DWORD   3
+#define TYPE_QWORD   4
+#define TYPE_FLOAT   5
+#define TYPE_DOUBLE  6
+#define TYPE_STRING  7
+
+#define REPR_CHAR    1
+#define REPR_HEX     2
+#define REPR_OCT     3
+#define REPR_BIN     4
+
+    for (;;)
+    {
+        switch ( *argstring )
+        {
+            //end of string
+            case 0:
+            {
+                if ( !output )
+                    goto help;
+
+                return;
+            }
+
+            //--help
+            case '-':
+            {
+                if ( indirection )
+                    goto bad_arg;
+
+                if ( strncmp(argstring, "--help", 6) == 0 )
+                    goto help;
+
+                //skip malformed argument
+                goto bad_arg;
+            }
+
+            //separator
+            case ' ':
+            {
+                argstring++;
+
+                if ( indirection )
+                    indirection = 0;
+
+                continue;
+            }
+
+            //modifier
+            case '/':
+            {
+                //modifiers with preceding asterisks are considered malformed
+                if ( indirection )
+                    goto bad_arg;
+
+                long newrepeat = 1;
+                long newtype = 0;
+                long newrepr = 0;
+
+                if ( isdigit(*(++argstring)) )
+                {
+                    char *endptr = NULL;
+                    newrepeat = strtol(argstring, &endptr, 10);
+                    if ( !repeat )
+                        repeat = 1;
+                    argstring = endptr;
+                }
+
+                switch ( *argstring++ )
+                {
+                    case 'b':
+                        newtype = TYPE_BYTE;
+
+                    case 'c':
+                        newtype = TYPE_BYTE;
+                        newrepr = REPR_CHAR;
+
+
+                    case 's':
+                        newtype = TYPE_STRING;
+
+                    case 'f':
+                        newtype = TYPE_FLOAT;
+
+                    //'lf' double
+                    case 'l':
+                        //
+
+                    case 'w':
+                        newtype = TYPE_WORD;
+
+                    case 'd':
+                        newtype = TYPE_DWORD;
+
+                    case 'q':
+                        newtype = TYPE_QWORD;
+
+                    //invalid
+                    default:
+                        goto bad_arg;
+                }
+            }
+
+            //indirection
+            case '*':
+            {
+                while ( *argstring++ == '*' )
+                    indirection++;
+
+                continue;
+            }
+
+            //location
+            case '0':
+            {
+                if ( tolower(*(++argstring)) == 'x' )
+                {
+                    char *end = NULL;
+                    location = strtol(++argstring, &end, 16);
+
+                    if ( !location || (*end && !isspace(*end)) )
+                    {
+                        location = 0;
+                        indirection = 0;
+
+                        continue;
+                    }
+
+                    goto print_value;
+                }
+                
+                //skip malformed argument
+                indirection = 0;
+                location = 0;
+
+                goto bad_arg;
+            }
+
+            //flag, register, or invalid
+            default:
+            {
+                int i = 0;
+
+                //worst loop ever written
+                //looks up flag/register
+                while (
+
+                    //valid index
+                    i < FLAGS_REGS_COUNT &&
+
+                    //matching identifier not found
+                    strncasecmp(
+                        argstring,
+                        flagsNregs[i],
+                        strlen(flagsNregs[i])
+                    ) != 0
+                  //increment
+                ) i++; /* end of loop */
+
+                if ( i == FLAGS_REGS_COUNT )
+                {
+                    indirection = 0;
+                    continue;
+                }
+
+                char value[32];
+                memset(value, 0, 32);
+
+                get_register_value(flagsNregs[i], value);
+                if ( indirection )
+                    location = *(long *)value;
+                else
+                    location = (long)(void*)value;
+
+print_value:
+                while ( indirection )
+                    location = (long)*(char **)location;
+
+                //print
+                char *fstring = NULL;
+                char buf[9];
+                memset(buf, 0, 9);
+
+                switch ( type )
+                {
+                    case TYPE_BYTE:
+                    {
+                        switch ( repr )
+                        {
+                            case REPR_CHAR:
+                                fstring = "%c";
+                                break;
+
+                            case REPR_BIN:
+                                fstring = "%s ";
+                                break;
+
+                            case REPR_OCT:
+                                fstring = "%03o ";
+                                break;
+
+                            case REPR_HEX:
+                                fstring = "%02x ";
+                                break;
+
+                            default:
+                                fstring = "%03d ";
+                        }
+
+                        for ( int j = 0; j < repeat; j++ )
+                        {
+                            //don't just pile them on one line: 8 bytes to a line
+                            if ( j % 8 == 0 && repr != REPR_CHAR )
+                                text_putchar('\n');
+
+                            if ( repr == REPR_BIN )
+                            {
+                                ltoa(*(int8_t *)location, buf, 2);
+
+                                for ( int k = strlen(buf); k < 8; k++ )
+                                    text_putchar('0');
+
+                                printf(fstring, buf);
+                                memset(buf, 0, 9);
+                            }
+                            else
+                                printf(fstring, *(int8_t *)location);
+
+                            location += sizeof(void *);
+                        }
+
+                        break;
+                    }
+
+                    case TYPE_WORD:
+                    {
+                        switch ( repr )
+                        {
+                            case REPR_BIN:
+                                fstring = "%s ";
+                                break;
+
+                            case REPR_OCT:
+                                fstring = "%06o ";
+                                break;
+
+                            case REPR_HEX:
+                                fstring = "%04x ";
+                                break;
+
+                            default:
+                            fstring = "%05d ";
+                        }
+
+                        for ( int j = 0; j < repeat; j++ )
+                        {
+                            if ( j % 8 == 0 )
+                                text_putchar('\n');
+
+                            if ( repr == REPR_BIN )
+                            {
+                                for ( int k = 0; k < 2; k++ )
+                                {
+                                    ltoa(*(int8_t *)(location+k), buf, 2);
+
+                                    for ( int l = strlen(buf); l < 8; k++ )
+                                        text_putchar('0');
+
+                                    printf(fstring, buf);
+                                    memset(buf, 0, 9);
+                                }
+                            }
+                            else
+                                printf(fstring, *(int16_t *)location);
+
+                            location += sizeof(void *);
+                        }
+
+                        break;
+                    }
+
+                    case TYPE_DWORD:
+                        switch ( repr )
+                        {
+                            case REPR_BIN:
+                                fstring = "%s ";
+                                break;
+
+                            case REPR_OCT:
+                                fstring = "%011o ";
+                                break;
+
+                            case REPR_HEX:
+                                fstring = "%08x ";
+                                break;
+
+                            default:
+                            fstring = "%010d ";
+                        }
+
+                        for ( int j = 0; j < repeat; j++ )
+                        {
+                            if ( j % 6 == 0 )
+                                text_putchar('\n');
+
+                            if ( repr == REPR_BIN )
+                            {
+                                if ( j && j % 3 == 0 )
+                                    text_putchar('\n');
+
+                                for ( int k = 0; k < 4; k++ )
+                                {
+                                    ltoa(*(int8_t *)(location+k), buf, 2);
+
+                                    for ( int l = strlen(buf); l < 8; l++ )
+                                        text_putchar('0');
+
+                                    printf(fstring, buf);
+                                    memset(buf, 0, 9);
+                                }
+                            }
+                            else
+                                printf(fstring, *(int32_t *)location);
+
+                            location += sizeof(void *);
+                        }
+
+                        break;
+
+                    case TYPE_QWORD:
+                    {
+                        switch ( repr )
+                        {
+                            case REPR_BIN:
+                                fstring = "%s";
+                                break;
+
+                            case REPR_OCT:
+                                fstring = "%022o ";
+                                break;
+
+                            case REPR_HEX:
+                                fstring = "%04x ";
+                                break;
+
+                            default:
+                            fstring = "%05d ";
+                        }
+
+                        for ( int j = 0; j < repeat; j++ )
+                        {
+                            if ( j % 2 == 0 )
+                                text_putchar('\n');
+
+                            if ( repr == REPR_BIN )
+                            {
+                                if ( j & 1 )
+                                    text_putchar('\n');
+
+                                for ( int k = 0; k < 8; k++ )
+                                {
+                                    ltoa(*(int8_t *)(location+k), buf, 2);
+
+                                    for ( int l = strlen(buf); l < 8; l++ )
+                                        text_putchar('0');
+
+                                    printf(fstring, buf);
+                                    memset(buf, 0, 9);
+                                }
+                            }
+                            else
+                                printf(fstring, *(int64_t *)location);
+
+                            location += sizeof(void *);
+                        }
+
+                        break;
+                    }
+
+                    case TYPE_FLOAT:
+                        switch ( repr )
+                        {
+                            case REPR_BIN:
+                                fstring = "%s ";
+                                break;
+
+                            case REPR_OCT:
+                                fstring = "%011o ";
+                                break;
+
+                            case REPR_HEX:
+                                fstring = "%08x ";
+                                break;
+
+                            default:
+                            fstring = "%f ";
+                        }
+
+                        for ( int j = 0; j < repeat; j++ )
+                        {
+                            if ( j % 6 == 0 )
+                                text_putchar('\n');
+
+                            if ( repr == REPR_BIN )
+                            {
+                                for ( int k = 0; k < 4; k++ )
+                                {
+                                    ltoa(*(int8_t *)(location+k), buf, 2);
+
+                                    for ( int l = strlen(buf); l < 8; l++ )
+                                        text_putchar('0');
+
+                                    printf(fstring, buf);
+                                    memset(buf, 0, 9);
+                                }
+                            }
+                            else
+                                printf(fstring, *(float *)location);
+
+                            location += sizeof(void *);
+                        }
+
+                        break;
+
+                    case TYPE_DOUBLE:
+                        switch ( repr )
+                        {
+                            case REPR_BIN:
+                                fstring = "%s ";
+                                break;
+
+                            case REPR_OCT:
+                                fstring = "%011o ";
+                                break;
+
+                            case REPR_HEX:
+                                fstring = "%08x ";
+                                break;
+
+                            default:
+                            fstring = "%010d ";
+                        }
+
+                        for ( int j = 0; j < repeat; j++ )
+                        {
+                            if ( j % 6 == 0 )
+                                text_putchar('\n');
+
+                            if ( repr == REPR_BIN )
+                            {
+                                for ( int k = 0; k < 8; k++ )
+                                {
+                                    ltoa(*(int8_t *)(location+k), buf, 2);
+
+                                    for ( int l = strlen(buf); l < 8; l++ )
+                                        text_putchar('0');
+
+                                    printf(fstring, buf);
+                                    memset(buf, 0, 9);
+                                }
+                            }
+                            else
+                                printf(fstring, *(double *)location);
+
+                            location += sizeof(void *);
+                        }
+
+                        break;
+
+                    case TYPE_STRING:
+                        for ( int j = 0; j < repeat; j++ )
+                        {
+                            puts(*(char **)location);
+                            location += sizeof(void *);
+                        }
+                }
+
+                location = 0;
+                output = 1;
+                goto bad_arg;
+            }
+        }
+
+bad_arg:
+        while ( *argstring && *argstring != ' ' )
+            argstring++;
+    }
+
+help:
+    puts(
+         "Usage:  peek [modifier] <location> [...]\n"
+         "\n"
+         "\tA location is a hexadecimal number starting with the 0x prefix\n"
+         "\twhich represents a location in memory. It may also be the name of\n"
+         "\ta register (e.g. esp), or the name of a flag (e.g. CF). Indirection\n"
+         "\tcan be used by means of the '*'' character prefixing the location as\n"
+         "\tlong as the location is not a flag. A hexadecimal location must be 4\n"
+         "\tbyte aligned, unless it has the byte, word, or char modifier, which\n"
+         "\thave alignments equal to their size in bytes, affecting it.\n"
+         "\n"
+         "\tModifiers affect how the value at the location is displayed. A\n"
+         "\tmodifier starts with a '/', optionally has a repeat argument, and\n"
+         "\tends with a type character. The repeat argument is a base 10 integer\n"
+         "\tthat denotes how many items of the following type will be displayed\n"
+         "\tstarting from the location argument it modifies, and the type argument\n"
+         "\tis one of:\n"
+         "\tb  (byte)\n"
+         "\tc  (char)\n"
+         "\ts  (string)\n"
+         "\tf  (single precision float)\n"
+         "\tlf (double precision float)\n"
+         "\tw  (word)\n"
+         "\td  (double word)\n"
+         "\tq  (quad word)\n"
+         "\tNumerical types can also have a trailing b (binary), o (octal), or\n"
+         "\tx (hexadecimal) trailing them, however, f and lf will be represented\n"
+         "\tas integral types based on their binary representation. Without one of\n"
+         "\tthese three, the output will be in base 10. A modifier modifies all of\n"
+         "\tthe following location arguments until a new modifier is given.\n"
+         "\tModifiers have no effect on flags.\n"
+         "\n"
+         "Warnings:\n"
+         "\tMalformed modifiers and locations will be silently ignored.\n"
+         "\tAttempting to access invalid memory will cause segfaults.\n"
+         "\n"
+         "Examples:\n"
+         "\tpeek /s 0xFFFF3538\n"
+         "\tpeek /8dx *ebp\n"
+         "\tpeek CF\n"
+         "\tpeek eax"
+    );
+}
+
+void get_register_value(char *regname, void *var)
+{
+    long bitmask;
+    int i = 0;
+
+    //worst loop ever written
+    //looks up flag/register
+    while (
+
+        //valid index
+        i < FLAGS_REGS_COUNT &&
+
+        //matching identifier not found
+        strncasecmp(
+            regname,
+            flagsNregs[i],
+            strlen(regname)
+        ) != 0
+      //increment
+    ) i++; /* end of loop */
+
+#define gpr_grab(reg, var) \
+asm volatile (             \
+    "push "reg"\n"        \
+    "pop %0\n"             \
+    :                      \
+    : "m" (var)            \
+    :                      \
+)
+
+#ifdef __64BIT__
+#define PREFIX "r"
+#else
+#define PREFIX "e"
+#endif
+
+    switch ( i )
+    {
+
+        case 0:
+            gpr_grab(PREFIX"ax" ,var);
+            break;
+
+        case 1:
+            gpr_grab(PREFIX"ax" ,var);
+            break;
+
+        case 2:
+            gpr_grab(PREFIX"ax" ,var);
+            break;
+
+        case 3:
+            gpr_grab(PREFIX"ax" ,var);
+            break;
+
+        case 4:
+            gpr_grab(PREFIX"ax" ,var);
+            break;
+
+        case 5:
+            gpr_grab(PREFIX"bx" ,var);
+            break;
+
+        case 6:
+            gpr_grab(PREFIX"bx" ,var);
+            break;
+
+        case 7:
+            gpr_grab(PREFIX"bx" ,var);
+            break;
+
+        case 8:
+            gpr_grab(PREFIX"bx" ,var);
+            break;
+
+        case 9:
+            gpr_grab(PREFIX"bx" ,var);
+            break;
+
+        case 10:
+            gpr_grab(PREFIX"cx" ,var);
+            break;
+
+        case 11:
+            gpr_grab(PREFIX"cx" ,var);
+            break;
+
+        case 12:
+            gpr_grab(PREFIX"cx" ,var);
+            break;
+
+        case 13:
+            gpr_grab(PREFIX"cx" ,var);
+            break;
+
+        case 14:
+            gpr_grab(PREFIX"cx" ,var);
+            break;
+
+        case 15:
+            gpr_grab(PREFIX"dx" ,var);
+            break;
+
+        case 16:
+            gpr_grab(PREFIX"dx" ,var);
+            break;
+
+        case 17:
+            gpr_grab(PREFIX"dx" ,var);
+            break;
+
+        case 18:
+            gpr_grab(PREFIX"dx" ,var);
+            break;
+
+        case 19:
+            gpr_grab(PREFIX"dx" ,var);
+            break;
+
+        case 20:
+            gpr_grab(PREFIX"si" ,var);
+            break;
+
+        case 21:
+            gpr_grab(PREFIX"si" ,var);
+            break;
+
+        case 22:
+            gpr_grab(PREFIX"si" ,var);
+            break;
+
+        case 23:
+            gpr_grab(PREFIX"si" ,var);
+            break;
+
+        case 24:
+            gpr_grab(PREFIX"di" ,var);
+            break;
+
+        case 25:
+            gpr_grab(PREFIX"di" ,var);
+            break;
+
+        case 26:
+            gpr_grab(PREFIX"di" ,var);
+            break;
+
+        case 27:
+            gpr_grab(PREFIX"di" ,var);
+            break;
+
+        case 28:
+            gpr_grab(PREFIX"sp" ,var);
+            break;
+
+        case 29:
+            gpr_grab(PREFIX"sp" ,var);
+            break;
+
+        case 30:
+            gpr_grab(PREFIX"sp" ,var);
+            break;
+
+        case 31:
+            gpr_grab(PREFIX"sp" ,var);
+            break;
+
+        case 32:
+            gpr_grab(PREFIX"bp" ,var);
+            break;
+
+        case 33:
+            gpr_grab(PREFIX"bp" ,var);
+            break;
+
+        case 34:
+            gpr_grab(PREFIX"bp" ,var);
+            break;
+
+        case 35:
+            gpr_grab(PREFIX"bp" ,var);
+            break;
+
+        case 36:
+            asm volatile (
+                "call get_retval;\n"
+                "get_retval:\n"
+                "pop %0;\n"
+                :
+                : "m" ((long *)var)
+                :
+            );
+            break;
+
+        case 37:
+            asm volatile (
+                "call get_retval1;\n"
+                "get_retval1:\n"
+                "pop %0;\n"
+                :
+                : "m" ((long *)var)
+                :
+            );
+            break;
+
+        case 38:
+            asm volatile (
+                "call get_retval2;\n"
+                "get_retval2:\n"
+                "pop %0;\n"
+                :
+                : "m" ((long *)var)
+                :
+            );
+            break;
+/* not yet bothering with fp
+        case 39:
+            gpr_grab("st(0)" ,var);
+            break;
+
+        case 40:
+            gpr_grab("mm0" ,var);
+            break;
+
+        case 41:
+            gpr_grab("st(1)" ,var);
+            break;
+
+        case 42:
+            gpr_grab("mm1" ,var);
+            break;
+
+        case 43:
+            gpr_grab("st(2)" ,var);
+            break;
+
+        case 44:
+            gpr_grab("mm2" ,var);
+            break;
+
+        case 45:
+            gpr_grab("st(3)" ,var);
+            break;
+
+        case 46:
+            gpr_grab("mm3" ,var);
+            break;
+
+        case 47:
+            gpr_grab("st(4)" ,var);
+            break;
+
+        case 48:
+            gpr_grab("mm4" ,var);
+            break;
+
+        case 49:
+            gpr_grab("st(5)" ,var);
+            break;
+
+        case 50:
+            gpr_grab("mm5" ,var);
+            break;
+
+        case 51:
+            gpr_grab("st(6)" ,var);
+            break;
+
+        case 52:
+            gpr_grab("mm6" ,var);
+            break;
+
+        case 53:
+            gpr_grab("st(7)" ,var);
+            break;
+
+        case 54:
+            gpr_grab("mm7" ,var);
+            break;
+
+        case 55:
+            break;
+
+        case 56:
+            gpr_grab("ymm0" ,var);
+            break;
+
+        case 57:
+            gpr_grab("xmm0" ,var);
+            break;
+
+        case 58:
+            break;
+
+        case 59:
+            gpr_grab("ymm1" ,var);
+            break;
+
+        case 60:
+            gpr_grab("xmm1" ,var);
+            break;
+
+        case 61:
+            break;
+
+        case 62:
+            gpr_grab("ymm2" ,var);
+            break;
+
+        case 63:
+            gpr_grab("xmm2" ,var);
+            break;
+
+        case 64:
+            break;
+
+        case 65:
+            gpr_grab("ymm3" ,var);
+            break;
+
+        case 66:
+            gpr_grab("xmm3" ,var);
+            break;
+
+        case 67:
+            break;
+
+        case 68:
+            gpr_grab("ymm4" ,var);
+            break;
+
+        case 69:
+            gpr_grab("xmm4" ,var);
+            break;
+
+        case 70:
+            break;
+
+        case 71:
+            gpr_grab("ymm5" ,var);
+            break;
+
+        case 72:
+            gpr_grab("xmm5" ,var);
+            break;
+
+        case 73:
+            break;
+
+        case 74:
+            gpr_grab("ymm6" ,var);
+            break;
+
+        case 75:
+            gpr_grab("xmm6" ,var);
+            break;
+
+        case 76:
+            break;
+
+        case 77:
+            gpr_grab("ymm7" ,var);
+            break;
+
+        case 78:
+            gpr_grab("xmm7" ,var);
+            break;
+
+        case 79:
+            break;
+
+        case 80:
+            gpr_grab("ymm8" ,var);
+            break;
+
+        case 81:
+            gpr_grab("xmm8" ,var);
+            break;
+
+        case 82:
+            break;
+
+        case 83:
+            gpr_grab("ymm9" ,var);
+            break;
+
+        case 84:
+            gpr_grab("xmm9" ,var);
+            break;
+
+        case 85:
+            break;
+
+        case 86:
+            gpr_grab("ymm10" ,var);
+            break;
+
+        case 87:
+            gpr_grab("xmm10" ,var);
+            break;
+
+        case 88:
+            break;
+
+        case 89:
+            gpr_grab("ymm11" ,var);
+            break;
+
+        case 90:
+            gpr_grab("xmm11" ,var);
+            break;
+
+        case 91:
+            break;
+
+        case 92:
+            gpr_grab("ymm12" ,var);
+            break;
+
+        case 93:
+            gpr_grab("xmm12" ,var);
+            break;
+
+        case 94:
+            break;
+
+        case 95:
+            gpr_grab("ymm13", var);
+            break;
+
+        case 96:
+            gpr_grab("xmm13", var);
+            break;
+
+        case 97:
+            break;
+
+        case 98:
+            gpr_grab("ymm14", var);
+            break;
+
+        case 99:
+            gpr_grab("xmm14", var);
+            break;
+
+        case 100:
+            break;
+
+        case 101:
+            gpr_grab("ymm15", var);
+            break;
+
+	    case 102:
+	        gpr_grab("xmm15", var);
+            break;
+
+        case 103:
+            break;
+
+        case 104:
+            break;
+
+        case 105:
+            break;
+
+        case 106:
+            break;
+
+        case 107:
+            break;
+
+        case 108:
+            break;
+
+        case 109:
+            break;
+
+        case 110:
+            break;
+
+        case 111:
+            break;
+
+        case 112:
+            break;
+
+        case 113:
+            break;
+
+        case 114:
+            break;
+
+        case 115:
+            break;
+
+        case 116:
+            break;
+
+        case 117:
+            break;
+
+        case 118:
+            break;
+*/
+#define cr_get(reg, var) \
+asm volatile (           \
+    "mov %0,"reg";\n"    \
+    : "=r" (var)         \
+    :                    \
+    :                    \
+)
+
+        case 119:
+            cr_get("cr0", *(long *)var);
+            break;
+
+        case 120:
+            cr_get("cr1", *(long *)var);
+            break;
+
+        case 121:
+            cr_get("cr2", *(long *)var);
+            break;
+
+        case 122:
+            cr_get("cr3", *(long *)var);
+            break;
+
+        case 123:
+            cr_get("cr4", *(long *)var);
+            break;
+
+        case 124:
+            cr_get("cr5", *(long *)var);
+            break;
+
+        case 125:
+            cr_get("cr6", *(long *)var);
+            break;
+
+        case 126:
+            cr_get("cr7", *(long *)var);
+            break;
+
+        case 127:
+            cr_get("cr8", *(long *)var);
+            break;
+
+        case 128:
+            cr_get("cr9", *(long *)var);
+            break;
+
+        case 129:
+            cr_get("cr10", *(long *)var);
+            break;
+
+        case 130:
+            cr_get("cr11", *(long *)var);
+            break;
+
+        case 131:
+            cr_get("cr12", *(long *)var);
+            break;
+
+        case 132:
+            cr_get("cr13", *(long *)var);
+            break;
+
+        case 133:
+            cr_get("cr14", *(long *)var);
+            break;
+
+        case 134:
+            cr_get("cr15", *(long *)var);
+            break;
+
+#define dr_get(reg, var) \
+asm volatile (           \
+    "mov %0,"reg";\n"    \
+    : "=r" (var)         \
+    :                    \
+    :                    \
+)
+
+        case 135:
+            dr_get("dr0", *(long *)var);
+            break;
+
+        case 136:
+            dr_get("dr1", *(long *)var);
+            break;
+
+        case 137:
+            dr_get("dr2", *(long *)var);
+            break;
+
+        case 138:
+            dr_get("dr3", *(long *)var);
+            break;
+
+        case 139:
+            dr_get("dr4", *(long *)var);
+            break;
+
+        case 140:
+            dr_get("dr5", *(long *)var);
+            break;
+
+        case 141:
+            dr_get("dr6", *(long *)var);
+            break;
+
+        case 142:
+            dr_get("dr7", *(long *)var);
+            break;
+#ifdef __64BIT__
+        case 143:
+            dr_get("dr8", *(long *)var);
+            break;
+
+        case 144:
+            dr_get("dr9", *(long *)var);
+            break;
+
+        case 145:
+            dr_get("dr10", *(long *)var);
+            break;
+
+        case 146:
+            dr_get("dr11", *(long *)var);
+            break;
+
+        case 147:
+            dr_get("dr12", *(long *)var);
+            break;
+
+        case 148:
+            dr_get("dr13", *(long *)var);
+            break;
+
+        case 149:
+            dr_get("cr14", *(long *)var);
+            break;
+
+        case 150:
+            dr_get("dr15", *(long *)var);
+            break;
+#endif
+        case 167: //gdtr
+        case 168:
+        case 169:
+        case 170:
+            //
+            break;
+        case 171:  //rflags
+            bitmask = ~0ul;
+            goto flags;
+        case 172: //eflags
+            bitmask = 0xFFFFFFFFul;
+            goto flags;
+        case 173: //flags
+            bitmask = 0xFFFFul;
+            goto flags;
+        case 174:
+            bitmask = 1 << 0;
+            goto flags;
+        case 175:
+            bitmask = 1 << 2;
+        case 176:
+            bitmask = 1 << 4;
+        case 177:
+            bitmask = 1 << 6;
+        case 178:
+            bitmask = 1 << 7;
+        case 179:
+            bitmask = 1 << 8;
+        case 180:
+            bitmask = 1 << 9;
+        case 181:
+            bitmask = 1 << 10;
+        case 182:
+            bitmask = 1 << 11; 
+        case 183:
+            bitmask = 3 << 12;
+        case 184:
+            bitmask = 1 << 14;
+        case 185:
+            bitmask = 1 << 16;
+        case 186:
+            bitmask = 1 << 17;
+        case 187:
+            bitmask = 1 << 18;
+        case 188:
+            bitmask = 1 << 19;
+        case 189:
+            bitmask = 1 << 20;
+        case 190:
+            bitmask = 1 << 21;
+flags:
+            asm volatile (
+                "pushfd;"
+                "pop %0;"
+                :
+                : "m" (var)
+                :
+            );
+            break;
+
+        default:
+            break;
+    }
 }

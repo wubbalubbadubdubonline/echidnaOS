@@ -61,6 +61,7 @@ int printf(const char *format, ...)
                     sign = 1;
                 }
             }
+
             else if ( *format == '+' )
             {
                 format++;
@@ -85,6 +86,7 @@ int printf(const char *format, ...)
                 width = va_arg(args, int);
                 width = width > 0 ? width : 0;
             }
+
             else
             {
                 for ( ; *format >= '0' && *format <= '9'; format++ )
@@ -121,6 +123,7 @@ int printf(const char *format, ...)
 
                 switch ( tolower(*(format+2)) )
                 {
+                    case 'o':
                     case 'd':
                     case 'i':
                     case 'x':
@@ -139,12 +142,14 @@ int printf(const char *format, ...)
                         continue;
                 }
             }
+
             else if ( *format == 'h' )
             {
                 int i = 0;
 
                 switch ( tolower(*(format+1)) )
                 {
+                    case 'o':
                     case 'd':
                     case 'i':
                     case 'x':
@@ -193,6 +198,7 @@ int printf(const char *format, ...)
 
                 switch ( tolower(*(format+1)) )
                 {
+                    case 'o':
                     case 'd':
                     case 'i':
                     case 'x':
@@ -214,7 +220,7 @@ int printf(const char *format, ...)
             }
 
             //done
-            if( *format == 's' )
+            if ( *format == 's' )
             {
                 char *s = va_arg(args, char *);
                 int length = strlen(s);
@@ -253,8 +259,56 @@ int printf(const char *format, ...)
 
                 continue;
             }
+
+            if ( *format == 'o' )
+            {
+                char buf[23];
+                char padchar = pad & PAD_ZERO ? '0' : ' ';
+                uint64_t n;
+                int _len;
+
+                switch(mod)
+                {
+                    case MOD_BYTE:
+                        n = va_arg(args, unsigned char);
+                        break;
+
+                    case MOD_SHORT:
+                        n = va_arg(args, unsigned short);
+                        break;
+
+                    case MOD_NONE:
+                        n = va_arg(args, unsigned int);
+                        break;
+
+                    case MOD_LONG:
+                        n = va_arg(args, unsigned long);
+                        break;
+
+//                    case MOD_LONG_LONG:
+//                        n = va_arg(args, unsigned long long);
+                }
+
+                _len = strlen(ltoa(n, buf, 8));
+                width -= _len;
+
+                count += _len + (width > 0 ? width : 0);
+
+                if ( (width > 0) && !(pad & PAD_RIGHT) )
+                    for ( ; width > 0; width-- ) 
+                        text_putchar(padchar), count++;
+
+                text_putstring(buf);
+
+                if ( pad & PAD_RIGHT )
+                    for ( ; width > 0; width-- )
+                        text_putchar(' ');
+
+                continue;
+            }
+
             //done
-            if( *format == 'd' || *format == 'i' )
+            if ( *format == 'd' || *format == 'i' )
             {
                 char buf[21];
                 char padchar = pad & PAD_ZERO ? '0' : ' ';
@@ -313,8 +367,9 @@ int printf(const char *format, ...)
 
                 continue;
             }
+
             //done
-            if( *format == 'x' )
+            if ( *format == 'x' )
             {
                 char buf[16];
                 char padchar = pad & PAD_ZERO ? '0' : ' ';
@@ -360,8 +415,9 @@ int printf(const char *format, ...)
 
                 continue;
             }
+
             //done
-            if( *format == 'X' )
+            if ( *format == 'X' )
             {
                 char buf[16];
                 char padchar = pad & PAD_ZERO ? '0' : ' ';
@@ -408,8 +464,9 @@ int printf(const char *format, ...)
                         text_putchar(' ');
                 continue;
             }
+
             //done
-            if( *format == 'u' )
+            if ( *format == 'u' )
             {
                 char buf[21], padchar;
                 uint64_t n;
@@ -460,14 +517,16 @@ int printf(const char *format, ...)
 
                 continue;
             }
+
             //done
-            if( *format == 'c' )
+            if ( *format == 'c' )
             {
                 /* char are converted to int when pushed on the stack */
                 text_putchar((char)va_arg(args, int));
                 count++;
                 continue;
             }
+            
             //in progress
             if ( tolower(*format) == 'f' )
             {

@@ -22,6 +22,18 @@ int strcmp(const char *str1, const char *str2)
   return 0;
 }
 
+int strcasecmp(const char *str1, const char *str2)
+{
+  size_t i;
+  for ( i = 0; str1[i] || str2[i]; i++ )
+  {
+    if ( tolower(str1[i]) > tolower(str2[i]) ) return 1;
+    if ( tolower(str1[i]) < tolower(str2[i]) ) return -1;
+  }
+
+  return 0;
+}
+
 int strncmp(const char *str1, const char *str2, size_t len)
 {
   size_t i;
@@ -29,6 +41,17 @@ int strncmp(const char *str1, const char *str2, size_t len)
   {
     if ( str1[i] > str2[i] ) return 1;
     if ( str1[i] < str2[i] ) return -1;
+  }
+  return 0;
+}
+
+int strncasecmp(const char *str1, const char *str2, size_t len)
+{
+  size_t i;
+  for ( i = 0; str1[i] || str2[i] && (i < len); i++ )
+  {
+    if ( tolower(str1[i]) > tolower(str2[i]) ) return 1;
+    if ( tolower(str1[i]) < tolower(str2[i]) ) return -1;
   }
   return 0;
 }

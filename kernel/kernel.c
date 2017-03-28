@@ -244,7 +244,7 @@ void peek(char *argstring)
                 if ( isdigit(*(++argstring)) )
                 {
                     char *endptr = NULL;
-                    newrepeat = strtol(argstring, &endptr, 10);
+                    newrepeat = strtoul(argstring, &endptr, 10);
                     if ( !repeat )
                         repeat = 1;
                     argstring = endptr;
@@ -254,42 +254,88 @@ void peek(char *argstring)
                 {
                     case 'b':
                         newtype = TYPE_BYTE;
+                        break;
 
                     case 'c':
                         newtype = TYPE_BYTE;
                         newrepr = REPR_CHAR;
 
+                        if ( *argstring != ' ' )
+                            goto bad_arg;
+
+                        break;
 
                     case 's':
                         newtype = TYPE_STRING;
+
+                        if ( *argstring != ' ' )
+                            goto bad_arg;
 
                     case 'f':
                         newtype = TYPE_FLOAT;
 
                     //'lf' double
                     case 'l':
-                        //
+                        if ( *argstring != 'f' )
+                            goto bad_arg;
+
+                        newtype = TYPE_DOUBLE;
+                        argstring++;
+                        break;
 
                     case 'w':
                         newtype = TYPE_WORD;
+                        break;
 
                     case 'd':
                         newtype = TYPE_DWORD;
+                        break;
 
                     case 'q':
                         newtype = TYPE_QWORD;
+                        break;
 
                     //invalid
                     default:
                         goto bad_arg;
                 }
+
+                switch ( *argstring++ )
+                {
+                    case ' ':
+                        break;
+
+                    case 'x':
+                        newrepr = REPR_HEX;
+                        break;
+
+                    case 'o':
+                        newrepr = REPR_OCT;
+                        break;
+
+                    case 'b':
+                        newrepr = REPR_BIN;
+                }
+
+                if ( *argstring != ' ' && argstring[-1] != ' ' )
+                    goto bad_arg;
+
+                type = newtype;
+                repr = newrepr;
+                repeat = newrepeat;
+
+                printf("DEBUG:\ntype = %ld;\nrepr = %ld;\nrepeat = %ld;\n\n", type, repr, repeat);
+
             }
 
             //indirection
             case '*':
             {
-                while ( *argstring++ == '*' )
+                while ( *argstring == '*' )
+                {
+                    argstring++;
                     indirection++;
+                }
 
                 continue;
             }
@@ -300,15 +346,12 @@ void peek(char *argstring)
                 if ( tolower(*(++argstring)) == 'x' )
                 {
                     char *end = NULL;
-                    location = strtol(++argstring, &end, 16);
+                    location = strtoul(++argstring, &end, 16);
 
                     if ( !location || (*end && !isspace(*end)) )
-                    {
-                        location = 0;
-                        indirection = 0;
+                        goto bad_arg;
 
-                        continue;
-                    }
+                    printf("DEBUG:\nlocation = %lx;\n\n", location);
 
                     goto print_value;
                 }
@@ -323,6 +366,9 @@ void peek(char *argstring)
             //flag, register, or invalid
             default:
             {
+                if ( isdigit(*argstring) )
+                    goto bad_arg;
+
                 int i = 0;
 
                 //worst loop ever written
@@ -346,6 +392,8 @@ void peek(char *argstring)
                     indirection = 0;
                     continue;
                 }
+
+                printf("DEBUG:\nfound %s\n\n", flagsNregs[i]);
 
                 char value[32];
                 memset(value, 0, 32);
@@ -413,6 +461,8 @@ print_value:
                             location += sizeof(void *);
                         }
 
+                        text_putchar('\n');
+
                         break;
                     }
 
@@ -460,9 +510,12 @@ print_value:
                             location += sizeof(void *);
                         }
 
+                        text_putchar('\n');
+
                         break;
                     }
 
+                    case 0:
                     case TYPE_DWORD:
                         switch ( repr )
                         {
@@ -508,6 +561,8 @@ print_value:
 
                             location += sizeof(void *);
                         }
+
+                        text_putchar('\n');
 
                         break;
 
@@ -558,6 +613,8 @@ print_value:
                             location += sizeof(void *);
                         }
 
+                        text_putchar('\n');
+
                         break;
                     }
 
@@ -604,6 +661,8 @@ print_value:
                             location += sizeof(void *);
                         }
 
+                        text_putchar('\n');
+
                         break;
 
                     case TYPE_DOUBLE:
@@ -648,6 +707,8 @@ print_value:
 
                             location += sizeof(void *);
                         }
+
+                        text_putchar('\n');
 
                         break;
 

@@ -117,7 +117,7 @@ int printf(const char *format, ...)
                 }
             }
 
-            if ( strncmp(format, "hh", 2) == 0 )
+            if ( *format == 'h' && *(format+1) == 'h' )
             {
                 int i = 0;
 
@@ -379,11 +379,11 @@ int printf(const char *format, ...)
                 switch(mod)
                 {
                     case MOD_BYTE:
-                        n = va_arg(args, unsigned char);
+                        n = (uint8_t)va_arg(args, unsigned char);
                         break;
 
                     case MOD_SHORT:
-                        n = va_arg(args, unsigned short);
+                        n = (uint16_t)va_arg(args, unsigned short);
                         break;
 
                     case MOD_NONE:

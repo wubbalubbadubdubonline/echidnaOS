@@ -132,7 +132,7 @@ char *_itoa(int n, char *buf, int base, int sign)
 	/* now it's time to copy the sting to buf in proper order */
 	cp = buf;
 
-	if ( base == 10 && *tmp == '-' )
+	if ( *tmp == '-' )
 		*cp++ = *tmp;
 
 	int len = strlen(tmp);
@@ -185,7 +185,7 @@ char *_ltoa(long n, char *buf, int base, int sign)
 	/* now it's time to copy the sting to buf in proper order */
 	cp = buf;
 
-	if ( base == 10 && *tmp == '-' )
+	if ( *tmp == '-' )
 		*cp++ = *tmp;
 
 	int len = strlen(tmp);

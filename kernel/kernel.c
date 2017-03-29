@@ -428,15 +428,15 @@ print_value:
                                 break;
 
                             case REPR_OCT:
-                                fstring = "%03o ";
+                                fstring = "%03hho ";
                                 break;
 
                             case REPR_HEX:
-                                fstring = "%02x ";
+                                fstring = "%02hhx ";
                                 break;
 
                             default:
-                                fstring = "%03d ";
+                                fstring = "%03hhd ";
                         }
 
                         for ( int j = 0; j < repeat; j++ )
@@ -447,7 +447,7 @@ print_value:
 
                             if ( repr == REPR_BIN )
                             {
-                                ltoa(*(int8_t *)location, buf, 2);
+                                ltoa(*(uint8_t *)location, buf, 2);
 
                                 for ( int k = strlen(buf); k < 8; k++ )
                                     text_putchar('0');
@@ -456,9 +456,9 @@ print_value:
                                 memset(buf, 0, 9);
                             }
                             else
-                                printf(fstring, *(int8_t *)location);
+                                printf(fstring, *(uint8_t *)location);
 
-                            location += sizeof(void *);
+                            location += sizeof(int8_t);
                         }
 
                         text_putchar('\n');
@@ -475,15 +475,15 @@ print_value:
                                 break;
 
                             case REPR_OCT:
-                                fstring = "%06o ";
+                                fstring = "%06ho ";
                                 break;
 
                             case REPR_HEX:
-                                fstring = "%04x ";
+                                fstring = "%04hx ";
                                 break;
 
                             default:
-                            fstring = "%05d ";
+                            fstring = "%05hd ";
                         }
 
                         for ( int j = 0; j < repeat; j++ )
@@ -495,7 +495,7 @@ print_value:
                             {
                                 for ( int k = 0; k < 2; k++ )
                                 {
-                                    ltoa(*(int8_t *)(location+k), buf, 2);
+                                    ltoa(*(uint8_t *)(location+k), buf, 2);
 
                                     for ( int l = strlen(buf); l < 8; k++ )
                                         text_putchar('0');
@@ -505,9 +505,9 @@ print_value:
                                 }
                             }
                             else
-                                printf(fstring, *(int16_t *)location);
+                                printf(fstring, *(uint16_t *)location);
 
-                            location += sizeof(void *);
+                            location += sizeof(int16_t);
                         }
 
                         text_putchar('\n');
@@ -542,12 +542,12 @@ print_value:
 
                             if ( repr == REPR_BIN )
                             {
-                                if ( j && j % 3 == 0 )
+                                if ( j && j % 2 == 0 )
                                     text_putchar('\n');
 
                                 for ( int k = 0; k < 4; k++ )
                                 {
-                                    ltoa(*(int8_t *)(location+k), buf, 2);
+                                    ltoa(*(uint8_t *)(location+k), buf, 2);
 
                                     for ( int l = strlen(buf); l < 8; l++ )
                                         text_putchar('0');
@@ -557,9 +557,9 @@ print_value:
                                 }
                             }
                             else
-                                printf(fstring, *(int32_t *)location);
+                                printf(fstring, *(uint32_t *)location);
 
-                            location += sizeof(void *);
+                            location += sizeof(int32_t);
                         }
 
                         text_putchar('\n');
@@ -575,15 +575,15 @@ print_value:
                                 break;
 
                             case REPR_OCT:
-                                fstring = "%022o ";
+                                fstring = "%022lo ";
                                 break;
 
                             case REPR_HEX:
-                                fstring = "%04x ";
+                                fstring = "%04lx ";
                                 break;
 
                             default:
-                            fstring = "%05d ";
+                            fstring = "%05ld ";
                         }
 
                         for ( int j = 0; j < repeat; j++ )
@@ -598,7 +598,7 @@ print_value:
 
                                 for ( int k = 0; k < 8; k++ )
                                 {
-                                    ltoa(*(int8_t *)(location+k), buf, 2);
+                                    ltoa(*(uint8_t *)(location+k), buf, 2);
 
                                     for ( int l = strlen(buf); l < 8; l++ )
                                         text_putchar('0');
@@ -608,9 +608,9 @@ print_value:
                                 }
                             }
                             else
-                                printf(fstring, *(int64_t *)location);
+                                printf(fstring, *(uint64_t *)location);
 
-                            location += sizeof(void *);
+                            location += sizeof(int64_t);
                         }
 
                         text_putchar('\n');
@@ -658,7 +658,7 @@ print_value:
                             else
                                 printf(fstring, *(float *)location);
 
-                            location += sizeof(void *);
+                            location += sizeof(float);
                         }
 
                         text_putchar('\n');
@@ -705,7 +705,7 @@ print_value:
                             else
                                 printf(fstring, *(double *)location);
 
-                            location += sizeof(void *);
+                            location += sizeof(double);
                         }
 
                         text_putchar('\n');

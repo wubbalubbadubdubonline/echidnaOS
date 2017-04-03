@@ -778,7 +778,7 @@ help:
 
 void get_register_value(char *regname, void *var)
 {
-    long bitmask;
+    long bitmask, *tmp = var;
     int i = 0;
 
     //worst loop ever written
@@ -797,12 +797,11 @@ void get_register_value(char *regname, void *var)
       //increment
     ) i++; /* end of loop */
 
-#define gpr_grab(reg, var) \
+#define gpr_grab(reg) \
 asm volatile (             \
-    "push "reg"\n"        \
-    "pop %0\n"             \
+    "mov %0,"reg"\n"       \
     :                      \
-    : "m" (var)            \
+    : "m" (*tmp)           \
     :                      \
 )
 
@@ -816,147 +815,147 @@ asm volatile (             \
     {
 
         case 0:
-            gpr_grab(PREFIX"ax" ,var);
+            gpr_grab(PREFIX"ax");
             break;
 
         case 1:
-            gpr_grab(PREFIX"ax" ,var);
+            gpr_grab(PREFIX"ax");
             break;
 
         case 2:
-            gpr_grab(PREFIX"ax" ,var);
+            gpr_grab(PREFIX"ax");
             break;
 
         case 3:
-            gpr_grab(PREFIX"ax" ,var);
+            gpr_grab(PREFIX"ax");
             break;
 
         case 4:
-            gpr_grab(PREFIX"ax" ,var);
+            gpr_grab(PREFIX"ax");
             break;
 
         case 5:
-            gpr_grab(PREFIX"bx" ,var);
+            gpr_grab(PREFIX"bx");
             break;
 
         case 6:
-            gpr_grab(PREFIX"bx" ,var);
+            gpr_grab(PREFIX"bx");
             break;
 
         case 7:
-            gpr_grab(PREFIX"bx" ,var);
+            gpr_grab(PREFIX"bx");
             break;
 
         case 8:
-            gpr_grab(PREFIX"bx" ,var);
+            gpr_grab(PREFIX"bx");
             break;
 
         case 9:
-            gpr_grab(PREFIX"bx" ,var);
+            gpr_grab(PREFIX"bx");
             break;
 
         case 10:
-            gpr_grab(PREFIX"cx" ,var);
+            gpr_grab(PREFIX"cx");
             break;
 
         case 11:
-            gpr_grab(PREFIX"cx" ,var);
+            gpr_grab(PREFIX"cx");
             break;
 
         case 12:
-            gpr_grab(PREFIX"cx" ,var);
+            gpr_grab(PREFIX"cx");
             break;
 
         case 13:
-            gpr_grab(PREFIX"cx" ,var);
+            gpr_grab(PREFIX"cx");
             break;
 
         case 14:
-            gpr_grab(PREFIX"cx" ,var);
+            gpr_grab(PREFIX"cx");
             break;
 
         case 15:
-            gpr_grab(PREFIX"dx" ,var);
+            gpr_grab(PREFIX"dx");
             break;
 
         case 16:
-            gpr_grab(PREFIX"dx" ,var);
+            gpr_grab(PREFIX"dx");
             break;
 
         case 17:
-            gpr_grab(PREFIX"dx" ,var);
+            gpr_grab(PREFIX"dx");
             break;
 
         case 18:
-            gpr_grab(PREFIX"dx" ,var);
+            gpr_grab(PREFIX"dx");
             break;
 
         case 19:
-            gpr_grab(PREFIX"dx" ,var);
+            gpr_grab(PREFIX"dx");
             break;
 
         case 20:
-            gpr_grab(PREFIX"si" ,var);
+            gpr_grab(PREFIX"si");
             break;
 
         case 21:
-            gpr_grab(PREFIX"si" ,var);
+            gpr_grab(PREFIX"si");
             break;
 
         case 22:
-            gpr_grab(PREFIX"si" ,var);
+            gpr_grab(PREFIX"si");
             break;
 
         case 23:
-            gpr_grab(PREFIX"si" ,var);
+            gpr_grab(PREFIX"si");
             break;
 
         case 24:
-            gpr_grab(PREFIX"di" ,var);
+            gpr_grab(PREFIX"di");
             break;
 
         case 25:
-            gpr_grab(PREFIX"di" ,var);
+            gpr_grab(PREFIX"di");
             break;
 
         case 26:
-            gpr_grab(PREFIX"di" ,var);
+            gpr_grab(PREFIX"di");
             break;
 
         case 27:
-            gpr_grab(PREFIX"di" ,var);
+            gpr_grab(PREFIX"di");
             break;
 
         case 28:
-            gpr_grab(PREFIX"sp" ,var);
+            gpr_grab(PREFIX"sp");
             break;
 
         case 29:
-            gpr_grab(PREFIX"sp" ,var);
+            gpr_grab(PREFIX"sp");
             break;
 
         case 30:
-            gpr_grab(PREFIX"sp" ,var);
+            gpr_grab(PREFIX"sp");
             break;
 
         case 31:
-            gpr_grab(PREFIX"sp" ,var);
+            gpr_grab(PREFIX"sp");
             break;
 
         case 32:
-            gpr_grab(PREFIX"bp" ,var);
+            gpr_grab(PREFIX"bp");
             break;
 
         case 33:
-            gpr_grab(PREFIX"bp" ,var);
+            gpr_grab(PREFIX"bp");
             break;
 
         case 34:
-            gpr_grab(PREFIX"bp" ,var);
+            gpr_grab(PREFIX"bp");
             break;
 
         case 35:
-            gpr_grab(PREFIX"bp" ,var);
+            gpr_grab(PREFIX"bp");
             break;
 
         case 36:
@@ -965,7 +964,7 @@ asm volatile (             \
                 "get_retval:\n"
                 "pop %0;\n"
                 :
-                : "m" ((long *)var)
+                : "m" (*tmp)
                 :
             );
             break;
@@ -976,7 +975,7 @@ asm volatile (             \
                 "get_retval1:\n"
                 "pop %0;\n"
                 :
-                : "m" ((long *)var)
+                : "m" (*tmp)
                 :
             );
             break;
@@ -987,249 +986,249 @@ asm volatile (             \
                 "get_retval2:\n"
                 "pop %0;\n"
                 :
-                : "m" ((long *)var)
+                : "m" (*tmp)
                 :
             );
             break;
 /* not yet bothering with fp
         case 39:
-            gpr_grab("st(0)" ,var);
+            gpr_grab("st(0)");
             break;
 
         case 40:
-            gpr_grab("mm0" ,var);
+            gpr_grab("mm0");
             break;
 
         case 41:
-            gpr_grab("st(1)" ,var);
+            gpr_grab("st(1)");
             break;
 
         case 42:
-            gpr_grab("mm1" ,var);
+            gpr_grab("mm1");
             break;
 
         case 43:
-            gpr_grab("st(2)" ,var);
+            gpr_grab("st(2)");
             break;
 
         case 44:
-            gpr_grab("mm2" ,var);
+            gpr_grab("mm2");
             break;
 
         case 45:
-            gpr_grab("st(3)" ,var);
+            gpr_grab("st(3)");
             break;
 
         case 46:
-            gpr_grab("mm3" ,var);
+            gpr_grab("mm3");
             break;
 
         case 47:
-            gpr_grab("st(4)" ,var);
+            gpr_grab("st(4)");
             break;
 
         case 48:
-            gpr_grab("mm4" ,var);
+            gpr_grab("mm4");
             break;
 
         case 49:
-            gpr_grab("st(5)" ,var);
+            gpr_grab("st(5)");
             break;
 
         case 50:
-            gpr_grab("mm5" ,var);
+            gpr_grab("mm5");
             break;
 
         case 51:
-            gpr_grab("st(6)" ,var);
+            gpr_grab("st(6)");
             break;
 
         case 52:
-            gpr_grab("mm6" ,var);
+            gpr_grab("mm6");
             break;
 
         case 53:
-            gpr_grab("st(7)" ,var);
+            gpr_grab("st(7)");
             break;
 
         case 54:
-            gpr_grab("mm7" ,var);
+            gpr_grab("mm7");
             break;
 
         case 55:
             break;
 
         case 56:
-            gpr_grab("ymm0" ,var);
+            gpr_grab("ymm0");
             break;
 
         case 57:
-            gpr_grab("xmm0" ,var);
+            gpr_grab("xmm0");
             break;
 
         case 58:
             break;
 
         case 59:
-            gpr_grab("ymm1" ,var);
+            gpr_grab("ymm1");
             break;
 
         case 60:
-            gpr_grab("xmm1" ,var);
+            gpr_grab("xmm1");
             break;
 
         case 61:
             break;
 
         case 62:
-            gpr_grab("ymm2" ,var);
+            gpr_grab("ymm2");
             break;
 
         case 63:
-            gpr_grab("xmm2" ,var);
+            gpr_grab("xmm2");
             break;
 
         case 64:
             break;
 
         case 65:
-            gpr_grab("ymm3" ,var);
+            gpr_grab("ymm3");
             break;
 
         case 66:
-            gpr_grab("xmm3" ,var);
+            gpr_grab("xmm3");
             break;
 
         case 67:
             break;
 
         case 68:
-            gpr_grab("ymm4" ,var);
+            gpr_grab("ymm4");
             break;
 
         case 69:
-            gpr_grab("xmm4" ,var);
+            gpr_grab("xmm4");
             break;
 
         case 70:
             break;
 
         case 71:
-            gpr_grab("ymm5" ,var);
+            gpr_grab("ymm5");
             break;
 
         case 72:
-            gpr_grab("xmm5" ,var);
+            gpr_grab("xmm5");
             break;
 
         case 73:
             break;
 
         case 74:
-            gpr_grab("ymm6" ,var);
+            gpr_grab("ymm6");
             break;
 
         case 75:
-            gpr_grab("xmm6" ,var);
+            gpr_grab("xmm6");
             break;
 
         case 76:
             break;
 
         case 77:
-            gpr_grab("ymm7" ,var);
+            gpr_grab("ymm7");
             break;
 
         case 78:
-            gpr_grab("xmm7" ,var);
+            gpr_grab("xmm7");
             break;
 
         case 79:
             break;
 
         case 80:
-            gpr_grab("ymm8" ,var);
+            gpr_grab("ymm8");
             break;
 
         case 81:
-            gpr_grab("xmm8" ,var);
+            gpr_grab("xmm8");
             break;
 
         case 82:
             break;
 
         case 83:
-            gpr_grab("ymm9" ,var);
+            gpr_grab("ymm9");
             break;
 
         case 84:
-            gpr_grab("xmm9" ,var);
+            gpr_grab("xmm9");
             break;
 
         case 85:
             break;
 
         case 86:
-            gpr_grab("ymm10" ,var);
+            gpr_grab("ymm10");
             break;
 
         case 87:
-            gpr_grab("xmm10" ,var);
+            gpr_grab("xmm10");
             break;
 
         case 88:
             break;
 
         case 89:
-            gpr_grab("ymm11" ,var);
+            gpr_grab("ymm11");
             break;
 
         case 90:
-            gpr_grab("xmm11" ,var);
+            gpr_grab("xmm11");
             break;
 
         case 91:
             break;
 
         case 92:
-            gpr_grab("ymm12" ,var);
+            gpr_grab("ymm12");
             break;
 
         case 93:
-            gpr_grab("xmm12" ,var);
+            gpr_grab("xmm12");
             break;
 
         case 94:
             break;
 
         case 95:
-            gpr_grab("ymm13", var);
+            gpr_grab("ymm13");
             break;
 
         case 96:
-            gpr_grab("xmm13", var);
+            gpr_grab("xmm13");
             break;
 
         case 97:
             break;
 
         case 98:
-            gpr_grab("ymm14", var);
+            gpr_grab("ymm14");
             break;
 
         case 99:
-            gpr_grab("xmm14", var);
+            gpr_grab("xmm14");
             break;
 
         case 100:
             break;
 
         case 101:
-            gpr_grab("ymm15", var);
+            gpr_grab("ymm15");
             break;
 
 	    case 102:
-	        gpr_grab("xmm15", var);
+	        gpr_grab("xmm15");
             break;
 
         case 103:
@@ -1280,148 +1279,148 @@ asm volatile (             \
         case 118:
             break;
 */
-#define cr_get(reg, var) \
+#define cr_get(reg) \
 asm volatile (           \
     "mov %0,"reg";\n"    \
-    : "=r" (var)         \
+    : "=r" (*tmp)        \
     :                    \
     :                    \
 )
 
         case 119:
-            cr_get("cr0", *(long *)var);
+            cr_get("cr0");
             break;
-
+/*  There is no CR1
         case 120:
-            cr_get("cr1", *(long *)var);
+            cr_get("cr1");
             break;
-
+*/
         case 121:
-            cr_get("cr2", *(long *)var);
+            cr_get("cr2");
             break;
 
         case 122:
-            cr_get("cr3", *(long *)var);
+            cr_get("cr3");
             break;
 
         case 123:
-            cr_get("cr4", *(long *)var);
+            cr_get("cr4");
             break;
-
+/*
         case 124:
-            cr_get("cr5", *(long *)var);
+            cr_get("cr5");
             break;
 
         case 125:
-            cr_get("cr6", *(long *)var);
+            cr_get("cr6");
             break;
 
         case 126:
-            cr_get("cr7", *(long *)var);
+            cr_get("cr7");
             break;
-
+*/
         case 127:
-            cr_get("cr8", *(long *)var);
+            cr_get("cr8");
             break;
-
+#ifdef __64BIT__
         case 128:
-            cr_get("cr9", *(long *)var);
+            cr_get("cr9");
             break;
 
         case 129:
-            cr_get("cr10", *(long *)var);
+            cr_get("cr10");
             break;
 
         case 130:
-            cr_get("cr11", *(long *)var);
+            cr_get("cr11");
             break;
 
         case 131:
-            cr_get("cr12", *(long *)var);
+            cr_get("cr12");
             break;
 
         case 132:
-            cr_get("cr13", *(long *)var);
+            cr_get("cr13");
             break;
 
         case 133:
-            cr_get("cr14", *(long *)var);
+            cr_get("cr14");
             break;
 
         case 134:
-            cr_get("cr15", *(long *)var);
+            cr_get("cr15");
             break;
-
-#define dr_get(reg, var) \
+#endif
+#define dr_get(reg) \
 asm volatile (           \
     "mov %0,"reg";\n"    \
-    : "=r" (var)         \
+    : "=r" (*tmp)         \
     :                    \
     :                    \
 )
 
         case 135:
-            dr_get("dr0", *(long *)var);
+            dr_get("dr0");
             break;
 
         case 136:
-            dr_get("dr1", *(long *)var);
+            dr_get("dr1");
             break;
 
         case 137:
-            dr_get("dr2", *(long *)var);
+            dr_get("dr2");
             break;
 
         case 138:
-            dr_get("dr3", *(long *)var);
+            dr_get("dr3");
             break;
-
+/*
         case 139:
-            dr_get("dr4", *(long *)var);
+            dr_get("dr4");
             break;
 
         case 140:
-            dr_get("dr5", *(long *)var);
+            dr_get("dr5");
             break;
 
         case 141:
-            dr_get("dr6", *(long *)var);
+            dr_get("dr6");
             break;
 
         case 142:
-            dr_get("dr7", *(long *)var);
-            break;
+            dr_get("dr7");
+            break;*/
 #ifdef __64BIT__
         case 143:
-            dr_get("dr8", *(long *)var);
+            dr_get("dr8");
             break;
 
         case 144:
-            dr_get("dr9", *(long *)var);
+            dr_get("dr9");
             break;
 
         case 145:
-            dr_get("dr10", *(long *)var);
+            dr_get("dr10");
             break;
 
         case 146:
-            dr_get("dr11", *(long *)var);
+            dr_get("dr11");
             break;
 
         case 147:
-            dr_get("dr12", *(long *)var);
+            dr_get("dr12");
             break;
 
         case 148:
-            dr_get("dr13", *(long *)var);
+            dr_get("dr13");
             break;
 
         case 149:
-            dr_get("cr14", *(long *)var);
+            dr_get("cr14");
             break;
 
         case 150:
-            dr_get("dr15", *(long *)var);
+            dr_get("dr15");
             break;
 #endif
         case 167: //gdtr
@@ -1444,34 +1443,49 @@ asm volatile (           \
             goto flags;
         case 175:
             bitmask = 1 << 2;
+            goto flags;
         case 176:
             bitmask = 1 << 4;
+            goto flags;
         case 177:
             bitmask = 1 << 6;
+            goto flags;
         case 178:
             bitmask = 1 << 7;
+            goto flags;
         case 179:
             bitmask = 1 << 8;
+            goto flags;
         case 180:
             bitmask = 1 << 9;
+            goto flags;
         case 181:
             bitmask = 1 << 10;
+            goto flags;
         case 182:
             bitmask = 1 << 11; 
+            goto flags;
         case 183:
             bitmask = 3 << 12;
+            goto flags;
         case 184:
             bitmask = 1 << 14;
+            goto flags;
         case 185:
             bitmask = 1 << 16;
+            goto flags;
         case 186:
             bitmask = 1 << 17;
+            goto flags;
         case 187:
             bitmask = 1 << 18;
+            goto flags;
         case 188:
             bitmask = 1 << 19;
+            goto flags;
         case 189:
             bitmask = 1 << 20;
+            goto flags;
         case 190:
             bitmask = 1 << 21;
 flags:
@@ -1479,9 +1493,10 @@ flags:
                 "pushfd;"
                 "pop %0;"
                 :
-                : "m" (var)
+                : "m" (*tmp)
                 :
             );
+            *(unsigned long *)var = *(unsigned long *)var & bitmask ? 1 : 0;
             break;
 
         default:

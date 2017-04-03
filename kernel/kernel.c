@@ -67,6 +67,16 @@ void _start(void) {
 	memory_map(0, (available_page*0x400000), 0xD0000000, 0);	// allocate 4 MiB of memory for the ramdrive
 	available_page++;
 
+    devices_initalize();
+    
+    fat32_filesystem fs;
+    partition_table table;
+
+    table = enumerate_partitions("ata1");
+
+    fs = get_fs(table.partitions[selected_partition], "ata1");                         
+    printf("i'm okay, i survived fs init");                    
+
 	kernel_shell();
 
 // anyone working on this stuff below should implement it properly into separate functions, then add commands to the shell below

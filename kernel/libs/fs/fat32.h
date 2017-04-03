@@ -53,7 +53,27 @@ typedef struct fat32_filesystem {
     fat32_fs_data data;
 } fat32_filesystem;
 
-void print_fat_oem(partition partition, char* dev);
+typedef struct {
+
+    uint8_t name[8];
+    uint8_t ext[3];
+    uint8_t attributes;
+    uint8_t reserved;
+    uint8_t cTimeTenth;
+    uint16_t cTime;
+    uint16_t cDate;
+    uint16_t aTime;
+
+    uint16_t firstClusterHi;
+
+    uint16_t wTime;
+    uint16_t wDate;
+
+    uint16_t firstClusterLo;
+    uint32_t size;
+
+} __attribute__((packed)) fat32_directory_entry;
+
 fat32_filesystem get_fs(partition partition, char* dev);
 
 #endif

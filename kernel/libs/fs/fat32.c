@@ -1,20 +1,7 @@
 #include "fat32.h"
 
-uint32_t cluster_to_lba(fat32_filesystem fs, uint32_t cluster){
+uint32_t cluster2lba(fat32_filesystem fs, uint32_t cluster){
 	return fs.data.cluster_begin_sector+(fs.sectors_per_cluster * (cluster-2));
-}
-
-void print_fat_oem(partition partition, char* dev) {
-    if (partition.type != 0xC)                      return;
-    
-    uint8_t sector[512] = {1};
-    disk_load_sector(dev, 0, 1, (uint32_t)sector);
-    
-    uint8_t loop;
-    for(loop = 0; loop < 8; loop++) {
-        text_putchar(mem_load_b(sector+0x3+loop));
-        
-    }
 }
 
 fat32_filesystem get_fs(partition partition, char* dev) {
@@ -56,7 +43,8 @@ fat32_filesystem get_fs(partition partition, char* dev) {
     for(loop = 0; loop < 8; loop++) {
         fs.fat_name[loop] = mem_load_b(sector+0x52+loop);
     } fs.fat_name[8] = 0x0;
-    
+
+
     if (strcmp("FAT32   ", fs.fat_name) != 0) return fs;
     
     // sector_fs_information loading
@@ -71,35 +59,48 @@ fat32_filesystem get_fs(partition partition, char* dev) {
     fs.info.most_recent_cluster = mem_load_d(sector + 0x1EC);
     
     fs.data.cluster_begin_sector = fs.partition.start_lba + fs.reserved_sectors + (fs.fat_copies * fs.sectors_per_fat);
-    fs.data.root_dir_sector = cluster_to_lba(fs, fs.cluster_of_start_root_dir);
+    fs.data.root_dir_sector = cluster2lba(fs, fs.cluster_of_start_root_dir);
     fs.data.fat_sector = fs.partition.start_lba + fs.reserved_sectors;
     fs.data.current_dir_cluster = fs.cluster_of_start_root_dir;
     
     fs.exists = 1;
     
+    fat32_directory_entry dirent[16];
+
+    disk_load_sector(dev, fs.data.root_dir_sector, 1, (uint32_t)&dirent[0]);
+
+    for (int counternigger = 0; counternigger < 16; counternigger++) {
+        if (dirent[counternigger].name[0] == 0x00) {
+            break;
+        }
+
+        if ((dirent[counternigger].attributes & 0x0F) == 0x0F)
+            continue;
+
+        char foo[] = "        ";
+        for (int j = 0; j < 8; j++) {
+            foo[j]=dirent[counternigger].name[j];
+        }
+
+        printf("%s\n", foo);
+
+        if((dirent[counternigger].attributes & 0x10) == 0x10) {
+            continue;
+        }
+
+        uint32_t fileCluster = ((uint32_t)dirent[counternigger].firstClusterHi) << 16 | ((uint32_t) dirent[counternigger].firstClusterLo);
+
+        uint32_t fileSector = cluster2lba(fs, fileCluster);
+
+        uint8_t buffer[512];
+
+        disk_load_sector(dev, fileSector, 1, (uint32_t)buffer);
+
+        buffer[dirent[counternigger].size] = '\0';
+        printf("%s\n\n\n", buffer);
+
+    }
+
     return fs;
 }
-
-// void list_directory(uint32_t cluster, fat32_filesystem fs, ata_device dev){
-//     uint8_t* buf;
-//     uint32_t ccluster = cluster;
-//     uint32_t sector = cluster_to_lba(fs, ccluster);
-//     uint16_t dir_size = 0;
-//     uint8_t done = 0;
-//     uint8_t current_col = 0;
-//     uint8_t current_row = 0;
-//     uint8_t oypos = 0;
-//     
-//     uint8_t i;
-//     
-//     while (done == 0) {
-//         buf = ata_read28(dev, sector);
-//         
-//         for (i = 0; i < 16; i++) {
-//             uint16_t loc = 0x20 * i;
-//             
-//         }
-//     }
-//     
-// }
 

@@ -13,11 +13,9 @@ echidna.img: kernel.sys bootloader.bin
 	dd bs=512 count=2872 status=none if=/dev/zero >> echidna.img
 	mkdir mnt
 	mount echidna.img ./mnt
-	sleep 3
 	cp kernel.sys mnt/
-	sleep 3
+	sync
 	umount ./mnt
-	sleep 3
 	rm -rf mnt
 	rm -rf ${OBJ} bootloader.bin kernel.sys
 

@@ -65,6 +65,8 @@ fat32_filesystem get_fs(partition partition, char* dev) {
     
     fs.exists = 1;
     
+    printf("sectors per cluster: %d\n", fs.sectors_per_cluster);
+
     fat32_directory_entry dirent[16];
 
     disk_load_sector(dev, fs.data.root_dir_sector, 1, (uint32_t)&dirent[0]);
@@ -88,17 +90,41 @@ fat32_filesystem get_fs(partition partition, char* dev) {
             continue;
         }
 
-        uint32_t fileCluster = ((uint32_t)dirent[counternigger].firstClusterHi) << 16 | ((uint32_t) dirent[counternigger].firstClusterLo);
+        uint32_t fileCluster = ((uint32_t)dirent[counternigger].firstClusterHi) << 16 | ((uint32_t) dirent[counternigger].firstClusterLo);    
+        int32_t size = dirent[counternigger].size;
 
-        uint32_t fileSector = cluster2lba(fs, fileCluster);
+        uint32_t next_file_cluster = fileCluster;
 
         uint8_t buffer[512];
+        uint8_t fatbuffer[512];
 
-        disk_load_sector(dev, fileSector, 1, (uint32_t)buffer);
+        printf("file size = %d\n", size);
 
-        buffer[dirent[counternigger].size] = '\0';
-        printf("%s\n\n\n", buffer);
+        while (size > 0) {
+            uint32_t fileSector = cluster2lba(fs, next_file_cluster);
+            uint32_t sectorOffset = 0;
 
+            for (; size > 0; size -= 512) {
+        
+                disk_load_sector(dev, fileSector + sectorOffset, 1, (uint32_t)buffer);
+
+                buffer[size > 512 ? 512 : size] = '\0';
+                printf("%s", buffer);
+
+                if (++sectorOffset > fs.sectors_per_cluster)
+                    break;
+            }
+
+            uint32_t fat_sector_current_cluster = next_file_cluster / (512 / 4);
+            disk_load_sector(dev, fs.data.fat_sector + sectorOffset, 1, (uint32_t)fatbuffer);
+
+            uint32_t fat_offset_sector_current_cluster = next_file_cluster % (512 / 4);
+
+            next_file_cluster = ((uint32_t*)&fatbuffer)[fat_offset_sector_current_cluster] & 0x0FFFFFFF;
+
+            // printf("remaining size = 0x%x\n", size);
+
+        }
     }
 
     return fs;

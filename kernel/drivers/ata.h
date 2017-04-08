@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include "system.h"
 #include "textdrv.h"
+#include "../libs/panic.h"
 
 typedef struct ata_device ata_device;
 

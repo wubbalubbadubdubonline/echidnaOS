@@ -71,62 +71,76 @@ fat32_filesystem get_fs(partition partition, char* dev) {
 
     disk_load_sector(dev, fs.data.root_dir_sector, 1, (uint32_t)&dirent[0]);
 
-    for (int counternigger = 0; counternigger < 16; counternigger++) {
-        if (dirent[counternigger].name[0] == 0x00) {
-            break;
-        }
-
-        if ((dirent[counternigger].attributes & 0x0F) == 0x0F)
-            continue;
-
-        char foo[] = "        ";
-        for (int j = 0; j < 8; j++) {
-            foo[j]=dirent[counternigger].name[j];
-        }
-
-        printf("%s\n", foo);
-
-        if((dirent[counternigger].attributes & 0x10) == 0x10) {
-            continue;
-        }
-
-        uint32_t fileCluster = ((uint32_t)dirent[counternigger].firstClusterHi) << 16 | ((uint32_t) dirent[counternigger].firstClusterLo);    
-        int32_t size = dirent[counternigger].size;
-
-        uint32_t next_file_cluster = fileCluster;
-
-        uint8_t buffer[512];
-        uint8_t fatbuffer[512];
-
-        printf("file size = %d\n", size);
-
-        while (size > 0) {
-            uint32_t fileSector = cluster2lba(fs, next_file_cluster);
-            uint32_t sectorOffset = 0;
-
-            for (; size > 0; size -= 512) {
+    for (int index = 0; index < 16; index++) {
+        if (dirent[index].name[0] != 0x00 && 
+            dirent[index].name[0] != 0xE5 ) {
         
-                disk_load_sector(dev, fileSector + sectorOffset, 1, (uint32_t)buffer);
 
-                buffer[size > 512 ? 512 : size] = '\0';
-                printf("%s", buffer);
+            if ((dirent[index].attributes & 0x0F) == 0x0F)
+                continue;
 
-                if (++sectorOffset > fs.sectors_per_cluster)
-                    break;
+            char foo[] = "        ";
+            char bar[] = "   ";
+            for (int j = 0; j < 8; j++) {
+                foo[j]=dirent[index].name[j];
             }
 
-            uint32_t fat_sector_current_cluster = next_file_cluster / (512 / 4);
-            disk_load_sector(dev, fs.data.fat_sector + sectorOffset, 1, (uint32_t)fatbuffer);
+            for (int j = 0; j < 3; j++) {
+                bar[j]=dirent[index].ext[j];
+            }
 
-            uint32_t fat_offset_sector_current_cluster = next_file_cluster % (512 / 4);
+            printf("%s.%s\n", foo, bar);
 
-            next_file_cluster = ((uint32_t*)&fatbuffer)[fat_offset_sector_current_cluster] & 0x0FFFFFFF;
+            if((dirent[index].attributes & 0x10) == 0x10) {
+                continue;
+            }
 
-            // printf("remaining size = 0x%x\n", size);
+            if((dirent[index].attributes & 0xF) == 0xF) {
+                continue;
+            }
 
+            if((dirent[index].attributes & 0xA) == 0xA) {
+                continue;
+            }
+
+
+            uint32_t fileCluster = ((uint32_t)dirent[index].firstClusterHi) << 16 | ((uint32_t) dirent[index].firstClusterLo);    
+            int64_t size = dirent[index].size;
+
+            uint32_t next_file_cluster = fileCluster;
+
+            uint8_t buffer[513];
+            uint8_t fatbuffer[512];
+
+            printf("file size = %d\n", size);
+
+            while (size > 0) {
+                uint32_t fileSector = cluster2lba(fs, next_file_cluster);
+                uint32_t sectorOffset = 0;
+
+                for (; size > 0; size -= 512) {
+            
+                    disk_load_sector(dev, fileSector + sectorOffset, 1, (uint32_t)buffer);
+
+                    buffer[size > 512 ? 512 : size] = '\0';
+                    printf("%s", buffer);
+
+                    if (++sectorOffset > fs.sectors_per_cluster)
+                        break;
+                }
+
+                uint32_t fat_sector_current_cluster = next_file_cluster / (512 / 4);
+                disk_load_sector(dev, fs.data.fat_sector + sectorOffset, 1, (uint32_t)fatbuffer);
+
+                uint32_t fat_offset_sector_current_cluster = next_file_cluster % (512 / 4);
+
+                next_file_cluster = ((uint32_t*)&fatbuffer)[fat_offset_sector_current_cluster] & 0x0FFFFFFF;
+
+                // printf("remaining size = 0x%x\n", size);
+
+            }
         }
     }
-
     return fs;
 }
 

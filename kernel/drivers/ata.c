@@ -84,7 +84,7 @@ ata_device ata_identify(ata_device dev) {
 
 uint8_t* ata_read28(ata_device dev, uint32_t sector) {
     if (sector > 0x0FFFFFFF)
-        return buffer;
+        panic("lba 28 bits only");
     
     if (dev.exists == 0) 
         return buffer;
@@ -126,7 +126,7 @@ uint8_t* ata_read28(ata_device dev, uint32_t sector) {
 
 void ata_write28(ata_device dev, uint32_t sector, uint8_t* data) {
     if (sector > 0x0FFFFFFF)
-        return;
+        panic("lba 28 bits only");
     
     if (dev.exists == 0) 
         return;

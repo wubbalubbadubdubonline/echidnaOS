@@ -53,6 +53,8 @@ typedef struct fat32_filesystem {
     fat32_fs_data data;
 } fat32_filesystem;
 
+    // 8 + 3 + 1 + 1 + 1 + 2 + 2 + 2 + 2 + 2 + 2 + 2 + 4
+
 typedef struct {
 
     uint8_t name[8];

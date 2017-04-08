@@ -16,6 +16,7 @@
 #include "drivers/pic.h"
 #include "drivers/gdt.h"
 #include "drivers/idt.h"
+#include "drivers/serial.h"
 #include "drivers/keyboard.h"
 #include "libs/fs/fat32.h"
 #include "drivers/device_abstraction.h"
@@ -24,6 +25,7 @@ void done_msg(void);
 void kernel_shell(void);
 void peek(char *);
 void get_register_value(char *, void *);
+void message_serial(char*);
 
 void _start(void) {
 	char buf[16];
@@ -77,7 +79,18 @@ void _start(void) {
     fs = get_fs(table.partitions[selected_partition], "ata1");                         
     printf("i'm okay, i survived fs init");                    
 
+    init_serial_port(COM1);
+    init_serial_port(COM2);
+    init_serial_port(COM3);
+    init_serial_port(COM4);
+    write_string_serial("Kernel init ok, nigger", COM1);
+    write_string_serial("Kernel init ok, nigger", COM2);
+    write_string_serial("Kernel init ok, nigger", COM3);
+    write_string_serial("Kernel init ok, nigger", COM4);
+
 	kernel_shell();
+
+    
 
 // anyone working on this stuff below should implement it properly into separate functions, then add commands to the shell below
 
@@ -179,8 +192,16 @@ void kernel_shell(void) {
 		if      (strcmp("clear", input) == 0)       text_clear();
 		else if (strcmp("panic", input) == 0)       panic("manually triggered panic");
         else if (strncmp("peek", input, 4) == 0)    peek(&input[4]);
+        else if (strncmp("serial_send", input, 11) == 0) message_serial(&input[11]);
 		else if (input[0]!=0)                       text_putstring("Invalid command.\n");
 	}
+}
+
+void message_serial(char* arg) {
+    write_string_serial(arg, COM1);
+    write_string_serial(arg, COM2);
+    write_string_serial(arg, COM3);
+    write_string_serial(arg, COM4);
 }
 
 void peek(char *argstring)

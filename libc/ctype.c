@@ -66,7 +66,8 @@ int isprint(int ch)
 
 int ispunct(int ch)
 {
-	if ( (ch >= 0x21 && ch <= 0x2F) ||
+	if ( 
+	     (ch >= 0x21 && ch <= 0x2F) ||
 	     (ch >= 0x3A && ch <= 0x40) ||
 	     (ch >= 0x5B && ch <= 0x60) ||
 	     (ch >= 0x7B && ch <= 0x7E)

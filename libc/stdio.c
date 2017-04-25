@@ -240,7 +240,7 @@ int printf(const char *format, ...)
                             for ( int i = width - length; i; i-- )
                                 text_putchar(' ');
 
-                            puts(s);
+                            text_putstring(s);
                         }
                     }
                     else
@@ -509,7 +509,7 @@ int printf(const char *format, ...)
                     }
                 }
 
-                puts(buf);
+                text_putstring(buf);
 
                 if ( pad & PAD_RIGHT )
                     for ( ; width > 0; width-- )

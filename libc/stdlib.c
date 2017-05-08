@@ -269,11 +269,11 @@ char *ltoa(long n, char *buf, int base)
 	return _lltoa(n, buf, base, 1);
 }*/
 
-long strtol(const char *str, char **endptr, int base)
+long strtol(char *str, char **endptr, int base)
 {
 	long num = 0;
 	int parse_success = 0;
-	const char *sptr = str;
+	char *sptr = str;
 	char signchar = 0;
 
 	//skip arbitrary space at beginning of string
@@ -356,11 +356,11 @@ long strtol(const char *str, char **endptr, int base)
 	}
 }
 
-long strtoul(const char *str, char **endptr, int base)
+long strtoul(char *str, char **endptr, int base)
 {
 	unsigned long num = 0;
 	int parse_success = 0;
-	const char *sptr = str;
+	char *sptr = str;
 	char signchar = 0;
 
 	//skip arbitrary space at beginning of string
